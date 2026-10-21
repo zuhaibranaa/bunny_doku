@@ -42,45 +42,73 @@ class StageNode extends StatelessWidget {
 
     return GestureDetector(
       onTap: isUnlocked ? onTap : null,
-      child: Container(
-        width: 64,
-        height: 64,
-        decoration: BoxDecoration(
-          color: fillColor,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.25),
-              blurRadius: 6,
-              offset: const Offset(0, 3),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: fillColor,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.25),
+                  blurRadius: 6,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+              border: isCompleted
+                  ? Border.all(color: Colors.amber, width: 4)
+                  : Border.all(
+                      color: Colors.white.withValues(alpha: 0.3), width: 2),
             ),
-          ],
-          border: isCompleted
-              ? Border.all(color: Colors.amber, width: 4)
-              : Border.all(color: Colors.white.withValues(alpha: 0.3), width: 2),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              '$stageId',
-              style: TextStyle(
-                color: iconColor,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                shadows: [
-                  Shadow(
-                    color: Colors.black.withValues(alpha: 0.3),
-                    offset: const Offset(0, 1),
-                    blurRadius: 2,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '$stageId',
+                  style: TextStyle(
+                    color: iconColor,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black.withValues(alpha: 0.3),
+                        offset: const Offset(0, 1),
+                        blurRadius: 2,
+                      ),
+                    ],
                   ),
-                ],
+                ),
+                const SizedBox(height: 4),
+                Icon(icon, color: iconColor, size: 20),
+              ],
+            ),
+          ),
+          // Stars actually earned on this stage (only once it is cleared).
+          if (isCompleted && stars > 0) ...[
+            const SizedBox(height: 2),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(
+                3,
+                (i) => Icon(
+                  i < stars ? Icons.star : Icons.star_border,
+                  size: 12,
+                  color: i < stars ? Colors.amber : Colors.white70,
+                  shadows: const [
+                    Shadow(
+                      color: Colors.black26,
+                      offset: Offset(0, 1),
+                      blurRadius: 2,
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 4),
-            Icon(icon, color: iconColor, size: 20),
           ],
-        ),
+        ],
       ),
     );
   }

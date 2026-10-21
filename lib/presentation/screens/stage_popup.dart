@@ -49,13 +49,28 @@ class StagePopup extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
+            if (stars > 0) ...[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  3,
+                  (i) => Icon(
+                    i < stars ? Icons.star : Icons.star_border,
+                    size: 26,
+                    color: i < stars ? Colors.amber : Colors.grey.shade400,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+            ],
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Icon(Icons.monetization_on, color: Colors.amber, size: 26),
                 const SizedBox(width: 6),
                 Text(
-                  stage.isSpecialStage ? '+5' : '+$stars',
+                  // Special stages always pay a flat 5-coin reward.
+                  stage.isSpecialStage ? '+5 coins' : '+$stars coins',
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,

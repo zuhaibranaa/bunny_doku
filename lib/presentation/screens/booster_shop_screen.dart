@@ -4,13 +4,13 @@ import '../../domain/entities/booster_entity.dart';
 import '../widgets/rabbit_icon.dart';
 
 /// Shop screen where players buy boosters with money or ads.
-class BoosterShopScreen extends StatelessWidget {
+class BoosterShopScreen extends StatefulWidget {
   final List<BoosterEntity> boosters;
   final void Function(String id, bool withAd) onBuyBooster;
   final void Function() onBuyRemoveAds;
   final bool isAdsRemoved;
   final int coinBalance;
-  final void Function(String id)? onBuyWithCoins;
+  final Future<bool> Function(String id)? onBuyWithCoins;
 
   BoosterShopScreen({
     super.key,
@@ -23,7 +23,22 @@ class BoosterShopScreen extends StatelessWidget {
   });
 
   @override
+  State<BoosterShopScreen> createState() => _BoosterShopScreenState();
+}
+
+class _BoosterShopScreenState extends State<BoosterShopScreen> {
+  /// Live coin balance — kept in sync after every coin purchase so the
+  /// header and the dialog never show a stale amount.
+  late int _balance = widget.coinBalance;
+
+  @override
   Widget build(BuildContext context) {
+    final boosters = widget.boosters;
+    final isAdsRemoved = widget.isAdsRemoved;
+    final onBuyBooster = widget.onBuyBooster;
+    final onBuyRemoveAds = widget.onBuyRemoveAds;
+    final onBuyWithCoins = widget.onBuyWithCoins;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Booster Shop'),
@@ -36,7 +51,7 @@ class BoosterShopScreen extends StatelessWidget {
               children: [
                 const Icon(Icons.monetization_on, color: Colors.amber),
                 const SizedBox(width: 4),
-                Text('$coinBalance'),
+                Text('$_balance'),
               ],
             ),
           )
@@ -113,17 +128,23 @@ class BoosterShopScreen extends StatelessWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Balance: $coinBalance coins'),
+            Text('Balance: $_balance coins'),
             const SizedBox(height: 12),
-            for (final b in boosters)
+            for (final b in widget.boosters)
               ListTile(
-                leading: _BoosterExt(this)._boosterIcon(b.id),
+                leading: _boosterIcon(b.id),
                 title: Text(b.name),
                 trailing: ElevatedButton(
-                  onPressed: coinBalance >= 100
-                      ? () {
-                          onBuyWithCoins?.call(b.id);
-                          Navigator.pop(dialogContext);
+                  onPressed: _balance >= 100
+                      ? () async {
+                          final bought = await widget.onBuyWithCoins?.call(b.id);
+                          if (!mounted) return;
+                          if (bought == true) {
+                            setState(() => _balance -= 100);
+                          }
+                          if (dialogContext.mounted) {
+                            Navigator.pop(dialogContext);
+                          }
                         }
                       : null,
                   child: const Text('Choose'),
@@ -140,9 +161,6 @@ class BoosterShopScreen extends StatelessWidget {
       ),
     );
   }
-}
-
-extension _BoosterExt on BoosterShopScreen {
   Widget _boosterIcon(String id) {
     if (id.contains('hint') || id.contains('reveal')) {
       return const Icon(Icons.lightbulb_outline, color: Color(0xFF8B5CF6), size: 28);

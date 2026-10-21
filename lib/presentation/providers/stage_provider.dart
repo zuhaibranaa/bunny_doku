@@ -78,4 +78,8 @@ class StageProvider extends ChangeNotifier {
     }
     return total;
   }
+
+  /// Stars earned on a single stage (0 when it has never been cleared).
+  int getStarsForStage(int stageId) =>
+      _repository.getStageProgress(stageId)?.starsEarned ?? 0;
 }

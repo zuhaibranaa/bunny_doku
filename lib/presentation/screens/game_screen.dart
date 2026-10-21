@@ -649,10 +649,17 @@ class _GameScreenState extends State<GameScreen> {
   // ---- Win / lose flow ----------------------------------------------------
 
   Future<void> _handleWin() async {
-    final hearts = _hearts();
-    final stars = hearts >= 3 ? 3 : (hearts == 2 ? 2 : 1);
     final stageId = _stage?['id'] as int? ?? 1;
     final isSpecial = _stage?['isSpecial'] == true;
+
+    // Special stages ship a single heart, so scoring them off
+    // `heartsRemaining` would always yield exactly 1 star. Instead, judge the
+    // run against the stage's own starting hearts: clear it without ever
+    // losing one and it was flawless (3 stars), otherwise scale down.
+    final maxHearts = isSpecial ? 1 : 3;
+    final hearts = _hearts();
+    final ratio = maxHearts == 0 ? 0.0 : hearts / maxHearts;
+    final stars = ratio >= 1.0 ? 3 : (ratio >= 1 / 3 ? 2 : 1);
 
     // Clearing the stage gives the entry life back.
     if (_lifeConsumed) {
@@ -665,15 +672,12 @@ class _GameScreenState extends State<GameScreen> {
       await _stageProvider.markStageCompleted(stageId, stars: stars);
       // Every completed stage adds to the total score shown on the map.
       _userRepo.addStars(stars);
-      if (isSpecial) {
-        // Special stages reward coins considering completion with 5 stars.
-        _userRepo.addCoins(5);
-      } else {
-        _userRepo.addCoins(stars);
-      }
+      // Special stages are the hardest clears in the game, so they always
+      // pay out a flat 5 coins rather than the star count.
+      _userRepo.addCoins(isSpecial ? 5 : stars);
     } catch (_) {}
     if (!mounted) return;
-    _showWinDialog(stars);
+    _showWinDialog(stars, coins: isSpecial ? 5 : stars);
   }
 
   int? get _nextStageId {
@@ -685,7 +689,7 @@ class _GameScreenState extends State<GameScreen> {
     return _stageProvider.isStageUnlocked(next.id) ? next.id : null;
   }
 
-  void _showWinDialog(int stars) {
+  void _showWinDialog(int stars, {int coins = 0}) {
     final stageId = _stage?['id'] as int? ?? 1;
     final nextId = _nextStageId;
     showDialog(
@@ -728,6 +732,24 @@ class _GameScreenState extends State<GameScreen> {
               style: const TextStyle(
                   fontSize: 18, fontWeight: FontWeight.bold, color: kMauve),
             ),
+            if (coins > 0) ...[
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.monetization_on,
+                      color: Colors.amber, size: 24),
+                  const SizedBox(width: 6),
+                  Text(
+                    '+$coins coins',
+                    style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: kMauve),
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
         actions: [

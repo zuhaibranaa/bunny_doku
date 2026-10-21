@@ -56,11 +56,12 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _showStagePopup(BuildContext context, StageEntity stage) {
+    final stars = context.read<StageProvider>().getStarsForStage(stage.id);
     showDialog(
       context: context,
       builder: (_) => StagePopup(
         stage: stage,
-        stars: 0,
+        stars: stars,
         onPlay: () {
           Navigator.pop(context);
           Navigator.pushNamed(context, '/game', arguments: {
@@ -118,10 +119,14 @@ class _MapScreenState extends State<MapScreen> {
                         // The 5-life pool lives on the map only.
                         ExtraLivesPill(userRepo: userRepo),
                         const Spacer(),
+                        // Total stars actually earned across every cleared
+                        // stage (not a live counter of the current run).
+                        _StarsPill(stars: stageProvider.getTotalStars()),
+                        const SizedBox(width: 12),
                         const Icon(Icons.monetization_on, color: Colors.amber),
                         const SizedBox(width: 4),
                         Text(
-                          '${stageProvider.getTotalScore()}',
+                          '${userRepo.getCurrentUser()?.totalCoins ?? 0}',
                           style: const TextStyle(
                               fontSize: 18, fontWeight: FontWeight.bold),
                         ),
@@ -158,6 +163,7 @@ class _MapScreenState extends State<MapScreen> {
                                 isUnlocked: isUnlocked,
                                 isCompleted: isCompleted,
                                 isSpecial: stage.isSpecialStage,
+                                stars: stageProvider.getStarsForStage(stage.id),
                                 onTap: isUnlocked
                                     ? () => _showStagePopup(context, stage)
                                     : null,
@@ -177,6 +183,29 @@ class _MapScreenState extends State<MapScreen> {
           ),
         );
       },
+    );
+  }
+}
+
+/// Compact pill in the map header showing the total stars the player has
+/// actually earned across every cleared stage.
+class _StarsPill extends StatelessWidget {
+  final int stars;
+
+  const _StarsPill({required this.stars});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.star, color: Colors.amber, size: 22),
+        const SizedBox(width: 4),
+        Text(
+          '$stars',
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+      ],
     );
   }
 }

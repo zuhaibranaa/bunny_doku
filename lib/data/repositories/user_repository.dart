@@ -54,6 +54,16 @@ class UserRepository {
     await saveUser(user);
   }
 
+  /// Spends coins. Returns false (and changes nothing) when the balance is
+  /// too low, so callers can check the result before granting the purchase.
+  Future<bool> spendCoins(int amount) async {
+    final user = getOrCreateUser();
+    if (user.totalCoins < amount) return false;
+    user.totalCoins -= amount;
+    await saveUser(user);
+    return true;
+  }
+
   Future<void> removeAds() async {
     final user = getOrCreateUser();
     user.isAdsRemoved = true;

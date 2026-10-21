@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../domain/entities/stage_entity.dart';
-import '../../domain/usecases/unlock_next_stage.dart';
-
 import '../../data/repositories/user_repository.dart';
 import '../../presentation/providers/booster_provider.dart';
-import '../../presentation/providers/stage_provider.dart';
 import '../../presentation/screens/splash_screen.dart';
 import '../../presentation/screens/map_screen.dart';
 import '../../presentation/screens/game_screen.dart';
@@ -30,8 +26,8 @@ class AppRouter {
           builder: (context) {
             final boosterProvider = context.read<BoosterProvider>();
             final userRepo = context.read<UserRepository>();
-            final stageProvider = context.read<StageProvider>();
-            final balance = stageProvider.getTotalScore();
+            // The real coin balance, not the star total.
+            final balance = userRepo.getCurrentUser()?.totalCoins ?? 0;
 
             return BoosterShopScreen(
               boosters: boosterProvider.boosters,
@@ -48,9 +44,12 @@ class AppRouter {
               isAdsRemoved: userRepo.getCurrentUser()?.isAdsRemoved ?? false,
               coinBalance: balance,
               onBuyWithCoins: (id) async {
-                if (balance >= 100) {
-                  await boosterProvider.addQuantity(id, 3);
-                }
+                // 3 boosters of any type for 100 coins — the coins are
+                // actually deducted so the balance stays truthful.
+                final paid = await userRepo.spendCoins(100);
+                if (!paid) return false;
+                await boosterProvider.addQuantity(id, 3);
+                return true;
               },
             );
           },
