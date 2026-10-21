@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/app_config.dart';
@@ -14,9 +15,9 @@ import '../../presentation/providers/booster_provider.dart';
 import '../../presentation/providers/game_provider.dart';
 import '../../presentation/providers/stage_provider.dart';
 import '../widgets/grid_cell.dart';
+import '../widgets/how_to_play_dialog.dart';
 import '../widgets/rabbit_icon.dart';
 import '../widgets/refill_countdown.dart';
-import '../widgets/x_mark.dart';
 import '../../utils/rules_engine.dart';
 
 bool get _isMobile => Platform.isAndroid || Platform.isIOS;
@@ -107,9 +108,37 @@ class _GameScreenState extends State<GameScreen> {
   bool? _dragModeSelect;
   double _cellSlot = 0; // cell width + spacing, set while laying out
 
+  /// Number of GameScreens currently on the stack.
+  static int _activeGameScreens = 0;
+
   @override
   void initState() {
     super.initState();
+    // Chaining to the next stage pushes a second GameScreen on top of this
+    // one, so only the last one standing may hand the orientation back.
+    _activeGameScreens++;
+    _lockPortrait();
+  }
+
+  /// The board is designed for portrait only — lock the device while the
+  /// stage is open and hand the orientation back when the player leaves.
+  Future<void> _lockPortrait() async {
+    try {
+      await SystemChrome.setPreferredOrientations(
+        const [DeviceOrientation.portraitUp],
+      );
+    } catch (_) {}
+  }
+
+  Future<void> _restoreOrientation() async {
+    try {
+      await SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+    } catch (_) {}
   }
 
   @override
@@ -193,6 +222,13 @@ class _GameScreenState extends State<GameScreen> {
     _disposed = true;
     _praiseTimer?.cancel();
     _hintTimer?.cancel();
+    // Hand the device orientation back to the rest of the app — but only
+    // when no other stage screen is still open.
+    _activeGameScreens--;
+    if (_activeGameScreens <= 0) {
+      _activeGameScreens = 0;
+      _restoreOrientation();
+    }
     super.dispose();
   }
 
@@ -280,46 +316,12 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Future<void> _showTutorial() async {
-    await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: kCream,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
-          'Tutorial',
-          style: TextStyle(color: kMauve, fontWeight: FontWeight.bold),
-        ),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('• Tap empty cell to place/remove X mark', style: TextStyle(color: kMauve)),
-            SizedBox(height: 6),
-            Text('• Double tap empty cell to place rabbit', style: TextStyle(color: kMauve)),
-            SizedBox(height: 6),
-            Text('• Tap a rabbit to remove it (starter locked)', style: TextStyle(color: kMauve)),
-            SizedBox(height: 6),
-            Text('• 1 rabbit per row, column, and color region', style: TextStyle(color: kMauve)),
-            SizedBox(height: 6),
-            Text('• No adjacent rabbits (including diagonal)', style: TextStyle(color: kMauve)),
-          ],
-        ),
-        actions: [
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: kOrange,
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () async {
-              await LocalStorage.setFirstRunDone(true);
-              if (dialogContext.mounted) Navigator.of(dialogContext).pop();
-            },
-            child: const Text('Got it'),
-          ),
-        ],
-      ),
+    // The first run opens the full animated "How to Play" tutorial.
+    await HowToPlayDialog.show(
+      context,
+      onFinished: () => LocalStorage.setFirstRunDone(true),
     );
+    await LocalStorage.setFirstRunDone(true);
   }
 
   // ---- Helpers ------------------------------------------------------------
@@ -963,7 +965,6 @@ class _GameScreenState extends State<GameScreen> {
               children: [
                 _buildTopBar(isSpecial),
                 _buildLivesRow(hearts, isSpecial),
-                _buildRulesPanel(),
                 _buildProgressStrip(placed),
                 Expanded(
                   child: Center(
@@ -1119,6 +1120,11 @@ class _GameScreenState extends State<GameScreen> {
           const SizedBox(width: 4),
           AnimatedCount(count: _score),
           IconButton(
+            tooltip: 'How to Play',
+            icon: const Icon(Icons.help_outline, color: kMauve),
+            onPressed: () => HowToPlayDialog.show(context),
+          ),
+          IconButton(
             icon: const Icon(Icons.shop, color: kMauve),
             onPressed: () => Navigator.pushNamed(context, '/shop'),
           ),
@@ -1181,63 +1187,6 @@ class _GameScreenState extends State<GameScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildRulesPanel() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      child: Row(
-        children: [
-          _ruleChip(const RabbitIcon(size: 30), '1 rabbit per color'),
-          _ruleChip(
-              const Icon(Icons.swap_horiz, size: 22, color: kMauve),
-              '1 per row & col'),
-          _ruleChip(
-              const BoldX(size: 22, color: kMauve, strokeWidthRatio: 0.22),
-              'no touching'),
-        ],
-      ),
-    );
-  }
-
-  Widget _ruleChip(Widget icon, String label) {
-    return Expanded(
-      child: Container(
-        height: 42,
-        margin: const EdgeInsets.symmetric(horizontal: 2),
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: kMauve.withValues(alpha: 0.08),
-              blurRadius: 3,
-              offset: const Offset(0, 1),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              height: 30,
-              width: 30,
-              child: Center(child: icon),
-            ),
-            const SizedBox(width: 4),
-            Flexible(
-              child: Text(
-                label,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 2,
-                style: const TextStyle(fontSize: 10, color: kMauve),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
