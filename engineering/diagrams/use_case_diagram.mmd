@@ -1,0 +1,46 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Player" as Player
+actor "Developer / Admin" as Dev
+actor "Ad Network (AdMob)" as AdNet
+actor "Payment Gateway (Google Play Billing / Apple App Store)" as PayGate
+
+rectangle "Rabit_doku Mobile App" {
+  usecase "View Stage Map (Candy Crush Style)" as UC1
+  usecase "Select & Play a Stage" as UC2
+  usecase "Place / Remove Rabbit on Grid" as UC3
+  usecase "Use Hint (Booster)" as UC4
+  usecase "Buy Booster with Real Money (IAP)" as UC5
+  usecase "Watch Rewarded Ad for Booster" as UC6
+  usecase "View Interstitial / Banner Ad" as UC7
+  usecase "Receive Daily Stage Release (Remote Config)" as UC8
+  usecase "Unlock Next Stage" as UC9
+  usecase "Save Game Progress (Stars, Hearts, Boosters)" as UC10
+  usecase "Remove Ads (One-time IAP)" as UC11
+}
+
+Player --> UC1 : browses
+Player --> UC2 : taps stage node
+Player --> UC3 : plays puzzle
+Player --> UC4 : spends booster
+Player --> UC5 : pays real money
+Player --> UC6 : watches ad
+Player --> UC7 : views ad
+Player --> UC9 : completes stage
+Player --> UC11 : purchases
+
+Dev --> UC8 : publishes daily stage pack
+AdNet --> UC6 : serves rewarded video
+AdNet --> UC7 : serves interstitial / banner
+PayGate --> UC5 : processes payment
+PayGate --> UC11 : processes payment
+
+UC2 ..> UC3 : starts
+UC3 ..> UC9 : on win/lose
+UC5 ..> UC4 : grants booster
+UC6 ..> UC4 : grants booster
+UC9 ..> UC10 : saves progress
+UC10 ..> UC2 : updates map state
+@enduml

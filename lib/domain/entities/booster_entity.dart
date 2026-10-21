@@ -1,0 +1,20 @@
+/// Domain entity for a booster.
+class BoosterEntity {
+  final String id;
+  final String name;
+  final String description;
+  final String icon;
+  final double priceUsd;
+  final bool priceAd;
+  final int adRewardAmount;
+
+  BoosterEntity({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.icon,
+    required this.priceUsd,
+    required this.priceAd,
+    required this.adRewardAmount,
+  });
+}

@@ -1,0 +1,69 @@
+import 'package:flutter/material.dart';
+
+/// Booster button in the shop / game UI.
+class BoosterButton extends StatelessWidget {
+  final String boosterId;
+  final String name;
+  final int quantity;
+  final double priceUsd;
+  final bool canBuyWithAd;
+  final VoidCallback onBuyWithMoney;
+  final VoidCallback onBuyWithAd;
+  final VoidCallback? onUse;
+
+  const BoosterButton({
+    super.key,
+    required this.boosterId,
+    required this.name,
+    required this.quantity,
+    required this.priceUsd,
+    required this.canBuyWithAd,
+    required this.onBuyWithMoney,
+    required this.onBuyWithAd,
+    this.onUse,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final canUse = quantity > 0 && onUse != null;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            if (canUse)
+              ElevatedButton.icon(
+                onPressed: onUse,
+                icon: const Icon(Icons.play_arrow, size: 16),
+                label: const Text('Use'),
+              )
+            else ...[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  if (canBuyWithAd)
+                    OutlinedButton.icon(
+                      onPressed: onBuyWithAd,
+                      icon: const Icon(Icons.play_circle, size: 16),
+                      label: const Text('Ad'),
+                    ),
+                  ElevatedButton.icon(
+                    onPressed: onBuyWithMoney,
+                    icon: const Icon(Icons.attach_money, size: 16),
+                    label: Text('\$${priceUsd.toStringAsFixed(2)}'),
+                  ),
+                ],
+              ),
+            ],
+            const SizedBox(height: 4),
+            Text('Owned: $quantity', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+          ],
+        ),
+      ),
+    );
+  }
+}

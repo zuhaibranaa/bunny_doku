@@ -1,0 +1,124 @@
+@startuml
+title Rabit_doku - Game Flow Diagrams
+
+'====================
+' 1. App Launch & Stage Loading Flow
+'====================
+partition "App Launch Flow" {
+  [*] --> "Splash Screen"
+  "Splash Screen" --> "Check Remote Config (contentVersion)"
+  "Check Remote Config" --> "New version available?"
+  
+  if "New version available?" then yes
+    --> "Download Stage Pack JSON"
+    --> "Cache Locally (Hive / shared_preferences)"
+  else no
+    --> "Load Cached Stages"
+  endif
+  
+  "Load Cached Stages" --> "Determine Unlocked Stages (by date + progression)"
+  "Determine Unlocked Stages" --> "Render Candy Crush Map"
+  "Render Candy Crush Map" --> [*]
+}
+
+'====================
+' 2. Stage Selection & Gameplay Flow
+'====================
+partition "Stage Selection & Gameplay Flow" {
+  "Render Candy Crush Map" --> "Player taps stage node"
+  "Player taps stage node" --> "Show Stage Popup (info, stars, lives)"
+  "Show Stage Popup" --> "Player taps Play"
+  "Player taps Play" --> "Initialize Game Board (10x10 grid, regions, starter rabbit)"
+  "Initialize Game Board" --> "Place / Remove Rabbit"
+  "Place / Remove Rabbit" --> "Validate Placement (Rules Engine)"
+  
+  if "Placement Valid?" then yes
+    --> "Update Board State"
+  else no
+    --> "Lose 1 Heart"
+  endif
+  
+  "Lose 1 Heart" --> "Hearts == 0?"
+  
+  if "Hearts == 0?" then yes
+    --> "Show Game Over (Revive via Ad or Booster)"
+    --> "Player chooses Revive?"
+    
+    if "Revive via Ad?" then yes
+      --> "Show Rewarded Ad"
+      --> "Restore 1 Heart"
+      --> "Resume Gameplay"
+    else no
+      --> "Use Booster?"
+      
+      if "Use Booster?" then yes
+        --> "Deduct Booster from Inventory"
+        --> "Apply Booster Effect"
+        --> "Resume Gameplay"
+      else no
+        --> "Return to Map (Stage Failed)"
+      endif
+    endif
+  else no
+    --> "Resume Gameplay"
+  endif
+  
+  "Update Board State" --> "All Regions Filled?"
+  
+  if "All Regions Filled?" then yes
+    --> "Stage Complete!"
+    --> "Calculate Stars (1-3 based on hearts, time, boosters)"
+    --> "Save Progress (unlock next stage, stars)"
+    --> "Show Interstitial Ad (if from stage 10+)"
+    --> "Return to Map"
+  else no
+    --> "Place / Remove Rabbit"
+  endif
+}
+
+'====================
+' 3. Booster Purchase Flow (IAP + Ad)
+'====================
+partition "Booster Purchase Flow" {
+  "Open Booster Shop" --> "Show Booster List (Hint, Extra Life, Undo, etc.)"
+  "Show Booster List" --> "Player selects booster"
+  "Player selects booster" --> "Choose: Buy with Money OR Watch Ad"
+  
+  if "Buy with Money?" then yes
+    --> "In-App Purchase (Google Play / Apple)"
+    --> "Validate Receipt (Server-side or Local)"
+    --> "Grant Booster to Inventory"
+  else no
+    --> "Show Rewarded Ad"
+    --> "Ad Completed?"
+    
+    if "Ad Completed?" then yes
+      --> "Grant Booster to Inventory"
+    else no
+      --> "No Booster Granted"
+    endif
+  endif
+  
+  "Grant Booster to Inventory" --> "Return to Game / Map"
+}
+
+'====================
+' 4. Daily Stage Release Flow
+'====================
+partition "Daily Stage Release Flow (No App Update)" {
+  "Developer publishes new stage pack JSON" --> "Remote Config / Endpoint updated"
+  "Remote Config / Endpoint updated" --> "App fetches on launch"
+  "App fetches on launch" --> "Compare contentVersion"
+  
+  if "contentVersion changed?" then yes
+    --> "Download new stages"
+    --> "Merge with cached stages"
+    --> "Unlock by unlockDate <= today"
+  else no
+    --> "Use existing cached stages"
+  endif
+  
+  "Unlock by unlockDate <= today" --> "New stages appear on Map (locked until date)"
+}
+
+@enduml

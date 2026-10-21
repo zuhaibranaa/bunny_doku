@@ -1,0 +1,117 @@
+@startuml
+title Rabit_doku - Entity Relationship Diagram
+
+entity "User" as User {
+  * userId: String
+  --
+  totalHearts: int
+  totalStars: int
+  adTenureDay: int
+  lastInterstitialTs: DateTime
+  isAdsRemoved: bool
+  createdAt: DateTime
+  lastLoginAt: DateTime
+}
+
+entity "Stage" as Stage {
+  * stageId: int
+  --
+  unlockDate: DateTime
+  difficulty: String
+  isSpecial: bool
+  regionGrid: JSON (10x10)
+  starterRabbitRow: int
+  starterRabbitCol: int
+  contentVersion: int
+}
+
+entity "StageProgress" as StageProgress {
+  * id: String
+  --
+  stageId: int
+  starsEarned: int (0-3)
+  isCompleted: bool
+  bestTime: int (seconds)
+  bestHeartsRemaining: int
+  completedAt: DateTime
+}
+
+entity "Booster" as Booster {
+  * boosterId: String
+  --
+  type: enum (HINT, EXTRA_LIFE, UNDO, REVEAL_CELL)
+  quantity: int
+  priceUsd: double
+  priceAd: bool (can be bought with ad)
+}
+
+entity "UserBoosterInventory" as UserBoosterInventory {
+  * id: String
+  --
+  userId: String
+  boosterId: String
+  quantityOwned: int
+  updatedAt: DateTime
+}
+
+entity "Purchase" as Purchase {
+  * purchaseId: String
+  --
+  userId: String
+  productId: String (booster_id or remove_ads)
+  type: enum (IAP, REWARDED_AD)
+  amountUsd: double
+  currency: String
+  receiptData: String
+  isValidated: bool
+  purchasedAt: DateTime
+}
+
+entity "AdEvent" as AdEvent {
+  * eventId: String
+  --
+  userId: String
+  type: enum (REWARDED, INTERSTITIAL, BANNER)
+  placement: String (revive, booster, level_transition, map)
+  rewardGranted: bool
+  watchedAt: DateTime
+}
+
+entity "GameSession" as GameSession {
+  * sessionId: String
+  --
+  userId: String
+  stageId: int
+  heartsStart: int
+  heartsEnd: int
+  boostersUsed: JSON
+  result: enum (WIN, LOSE, QUIT)
+  durationSeconds: int
+  startedAt: DateTime
+  endedAt: DateTime
+}
+
+'====================
+' Relationships
+'====================
+User ||--|| StageProgress : "has progress for"
+User ||--|{ UserBoosterInventory : "owns"
+User ||--|{ Purchase : "makes"
+User ||--|{ AdEvent : "triggers"
+User ||--|{ GameSession : "plays"
+
+Stage ||--|| StageProgress : "tracked in"
+Stage ||--|{ GameSession : "played in"
+
+Booster ||--|| UserBoosterInventory : "stocked in"
+Booster ||--|{ Purchase : "purchased as"
+
+Purchase }|--|| User : "by"
+Purchase }|--|| Booster : "for"
+
+AdEvent }|--|| User : "by"
+
+GameSession }|--|| User : "by"
+GameSession }|--|| Stage : "of"
+
+@enduml

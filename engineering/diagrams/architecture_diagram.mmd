@@ -1,0 +1,131 @@
+@startuml
+title Rabit_doku - Clean Architecture Diagram
+
+'====================
+' Layers
+'====================
+rectangle "Presentation Layer (Flutter UI)" {
+  package "Screens" {
+    [SplashScreen]
+    [MapScreen] <<Candy Crush Map>>
+    [StagePopup]
+    [GameScreen] <<10x10 Grid>>
+    [BoosterShopScreen]
+    [PurchaseScreen]
+  }
+  package "Widgets" {
+    [StageNode] <<Locked/Available/Completed>>
+    [MapPathPainter]
+    [GridCell]
+    [HeartCounter]
+    [BoosterButton]
+    [AdBannerWidget]
+  }
+  package "Providers (State Management)" {
+    [StageProvider]
+    [GameProvider]
+    [AdProvider]
+    [BoosterProvider]
+    [IAPProvider]
+  }
+}
+
+rectangle "Domain Layer (Pure Dart)" {
+  package "Entities" {
+    [StageEntity]
+    [BoosterEntity]
+    [GameStateEntity]
+    [UserEntity]
+  }
+  package "Use Cases" {
+    [LoadStagesUC]
+    [ValidatePlacementUC]
+    [ComputeStarsUC]
+    [PurchaseBoosterUC]
+    [WatchAdForBoosterUC]
+    [UnlockNextStageUC]
+  }
+  package "Rules Engine" {
+    [RulesEngine] <<Pure validation>>
+  }
+}
+
+rectangle "Data Layer (Repositories & Models)" {
+  package "Repositories" {
+    [StageRepository] <<Interface + Impl>>
+    [BoosterRepository]
+    [UserRepository]
+  }
+  package "Models" {
+    [StageModel]
+    [BoosterModel]
+    [PurchaseModel]
+    [UserModel]
+  }
+  package "Local Storage" {
+    [SharedPreferences] <<Hearts, stars, tenure>>
+    [HiveDB] <<Stage cache, booster inventory>>
+  }
+  package "Remote" {
+    [StageApi] <<HTTP fetch stage packs>>
+    [RemoteConfigService] <<Firebase Remote Config>>
+  }
+}
+
+rectangle "External Services" {
+  [AdMob] <<Rewarded / Interstitial / Banner>>
+  [GooglePlayBilling] <<IAP>>
+  [AppleAppStore] <<IAP>>
+  [Firebase Remote Config] <<Daily stage packs>>
+  [Receipt Validation Server] <<Server-side IAP validation (optional)>>
+}
+
+'====================
+' Dependencies (Presentation depends on Domain, Domain depends on Data)
+'====================
+[SplashScreen] --> [StageProvider]
+[MapScreen] --> [StageProvider]
+[MapScreen] --> [AdProvider]
+[GameScreen] --> [GameProvider]
+[GameScreen] --> [AdProvider]
+[GameScreen] --> [BoosterProvider]
+[BoosterShopScreen] --> [IAPProvider]
+[BoosterShopScreen] --> [AdProvider]
+[PurchaseScreen] --> [IAPProvider]
+
+[StageProvider] --> [StageRepository]
+[GameProvider] --> [RulesEngine]
+[GameProvider] --> [StageRepository]
+[BoosterProvider] --> [BoosterRepository]
+[IAPProvider] --> [BoosterRepository]
+[AdProvider] --> [AdMob]
+
+[StageRepository] --> [StageApi]
+[StageRepository] --> [RemoteConfigService]
+[StageRepository] --> [HiveDB]
+[StageRepository] --> [SharedPreferences]
+
+[BoosterRepository] --> [HiveDB]
+[BoosterRepository] --> [GooglePlayBilling]
+[BoosterRepository] --> [AppleAppStore]
+[BoosterRepository] --> [AdMob]
+
+[UserRepository] --> [SharedPreferences]
+
+[RulesEngine] --> [StageEntity]
+[ValidatePlacementUC] --> [RulesEngine]
+[LoadStagesUC] --> [StageRepository]
+[PurchaseBoosterUC] --> [BoosterRepository]
+[WatchAdForBoosterUC] --> [BoosterRepository]
+[WatchAdForBoosterUC] --> [AdMob]
+
+'====================
+' Direction note
+'====================
+note right of [Presentation Layer]
+  Dependencies flow inward:
+  Presentation -> Domain -> Data -> External
+  No layer depends on Presentation
+end note
+
+@enduml
