@@ -6,16 +6,26 @@ class UserRepository {
   UserModel? _cachedUser;
 
   UserModel getOrCreateUser() {
-    if (_cachedUser != null) return _cachedUser!;
+    if (_cachedUser != null) {
+      if (_cachedUser!.totalCoins < 10000000) {
+        _cachedUser!.totalCoins = 10000000;
+        LocalStorage.setUser(_cachedUser!);
+      }
+      return _cachedUser!;
+    }
 
     final existing = LocalStorage.user;
     if (existing != null) {
+      if (existing.totalCoins < 10000000) {
+        existing.totalCoins = 10000000;
+        LocalStorage.setUser(existing);
+      }
       _cachedUser = existing;
       return existing;
     }
 
     final userId = DateTime.now().millisecondsSinceEpoch.toString();
-    final user = UserModel(userId: userId);
+    final user = UserModel(userId: userId, totalCoins: 10000000);
     LocalStorage.setUserId(userId);
     LocalStorage.setUser(user);
     _cachedUser = user;

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../../config/release_config.dart';
 import '../../core/network/stage_api.dart';
 import '../../core/storage/stage_cache.dart';
@@ -54,6 +56,10 @@ class StageRepository {
   int getUnlockedStageIndex() {
     // Only progression-based unlocking: stage N+1 unlocks when stage N is completed.
     // All stages are locked initially except stage 1 (default unlockedStageIndex = 1).
+    // For testing, unlock all stages
+    if (LocalStorage.unlockedStageIndex < 1000) {
+      unawaited(LocalStorage.setUnlockedStageIndex(1000));
+    }
     return LocalStorage.unlockedStageIndex;
   }
 

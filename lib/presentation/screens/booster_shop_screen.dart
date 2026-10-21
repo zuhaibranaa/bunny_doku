@@ -162,15 +162,13 @@ class _BoosterShopScreenState extends State<BoosterShopScreen> {
     );
   }
   Widget _boosterIcon(String id) {
-    if (id.contains('hint') || id.contains('reveal')) {
+    if (id.contains('hint')) {
       return const Icon(Icons.lightbulb_outline, color: Color(0xFF8B5CF6), size: 28);
     }
-    if (id.contains('undo')) {
-      return const Icon(Icons.undo, color: Color(0xFF5E72EB), size: 28);
+    if (id.contains('reveal')) {
+      return const Icon(Icons.remove_red_eye, color: Colors.teal, size: 28);
     }
-    if (id.contains('extra_life')) {
-      return const Icon(Icons.favorite, color: Colors.pink, size: 28);
-    }
+    // undo booster is removed from UI
     return const RabbitIcon(size: 28);
   }
 }

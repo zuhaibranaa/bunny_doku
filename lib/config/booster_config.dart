@@ -4,7 +4,6 @@
 class BoosterConfig {
   static const String hint = 'booster_hint';
   static const String extraLife = 'booster_extra_life';
-  static const String undo = 'booster_undo';
   static const String revealCell = 'booster_reveal_cell';
 
   static const List<Map<String, dynamic>> allBoosters = [
@@ -23,15 +22,6 @@ class BoosterConfig {
       'description': 'Adds one extra heart to the current stage.',
       'icon': 'assets/images/booster/extra_life.svg',
       'priceUsd': 1.49,
-      'priceAd': true,
-      'adRewardAmount': 1,
-    },
-    {
-      'id': undo,
-      'name': 'Undo Move',
-      'description': 'Reverts your last rabbit placement.',
-      'icon': 'assets/images/booster/undo.svg',
-      'priceUsd': 0.99,
       'priceAd': true,
       'adRewardAmount': 1,
     },

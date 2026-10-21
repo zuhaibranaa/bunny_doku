@@ -582,22 +582,111 @@ class _GameScreenState extends State<GameScreen> {
     return null;
   }
 
+  /// Evaluate the current board and return the set of cell keys that are
+  /// definitively wrong (cannot hold a rabbit) based on the current placement
+  /// and the solution. These cells should be marked with an X.
+  Set<String> _evaluateWrongCells() {
+    final wrong = <String>{};
+    final placed = _placedSet();
+    final sol = _solution;
+    if (sol == null) return wrong;
+
+    for (final k in placed) {
+      final parts = k.split(',');
+      final r = int.parse(parts[0]);
+      final c = int.parse(parts[1]);
+
+      // Same row: all other cells in this row are wrong (another rabbit here would break the rule)
+      for (int cc = 0; cc < _gridSize; cc++) {
+        final other = RulesEngine.key(r, cc);
+        if (!other.contains(k) && !placed.contains(other)) {
+          wrong.add(other);
+        }
+      }
+
+      // Same column: all other cells in this column are wrong
+      for (int rr = 0; rr < _gridSize; rr++) {
+        final other = RulesEngine.key(rr, c);
+        if (!other.contains(k) && !placed.contains(other)) {
+          wrong.add(other);
+        }
+      }
+
+      // Same region: all other cells in this region are wrong
+      final regionId = _regionGrid[r][c];
+      for (int i = 0; i < _gridSize; i++) {
+        for (int j = 0; j < _gridSize; j++) {
+          if (_regionGrid[i][j] == regionId) {
+            final other = RulesEngine.key(i, j);
+            if (!other.contains(k) && !placed.contains(other) && !wrong.contains(other)) {
+              wrong.add(other);
+            }
+          }
+        }
+      }
+
+      // Diagonal touch: cells that touch diagonally are wrong
+      for (int dr = -1; dr <= 1; dr++) {
+        for (int dc = -1; dc <= 1; dc++) {
+          if (dr == 0 && dc == 0) continue;
+          final nr = r + dr;
+          final nc = c + dc;
+          if (nr >= 0 && nr < _gridSize && nc >= 0 && nc < _gridSize) {
+            final other = RulesEngine.key(nr, nc);
+            if (!other.contains(k) && !placed.contains(other) && !wrong.contains(other)) {
+              wrong.add(other);
+            }
+          }
+        }
+      }
+    }
+
+    return wrong;
+  }
+
   Future<void> _useHint() async {
-    final target = _nextSolutionCell();
-    if (target == null) {
-      _showPraise('All rabbits placed!', Colors.teal);
+    // Evaluate which cells are definitively wrong based on current placement
+    // and the solution, then mark them with X marks and a temporary highlight.
+    final wrong = _evaluateWrongCells();
+
+    if (wrong.isEmpty) {
+      // If no definite wrong cells, fall back to highlighting the next unplaced
+      // solution cell (the classic hint behaviour).
+      final target = _nextSolutionCell();
+      if (target == null) {
+        _showPraise('All rabbits placed!', Colors.teal);
+        return;
+      }
+      final ok = await _boosterProvider.consume(BoosterConfig.hint);
+      if (!ok) {
+        _snack('No Hint boosters — get more in the shop or watch an ad.');
+        return;
+      }
+      setState(() => _hintKeys.add(target));
+      _hintTimer?.cancel();
+      _hintTimer = Timer(const Duration(milliseconds: 2200), () {
+        if (!_disposed) setState(() => _hintKeys.remove(target));
+      });
+      _snack('Hint: the next rabbit must go in this cell.');
       return;
     }
-    final ok = await _boosterProvider.consume(BoosterConfig.hint);
-    if (!ok) {
-      _snack('No Hint boosters — get more in the shop or watch an ad.');
-      return;
-    }
-    setState(() => _hintKeys.add(target));
+
+    // Mark the wrong cells with X marks and keep one temporarily highlighted.
+    setState(() {
+      _wrongCells.addAll(wrong);
+    });
+
+    // Pick one wrong cell to highlight temporarily (for 2.2 s).
+    final highlight = wrong.first;
+    setState(() => _hintKeys.add(highlight));
     _hintTimer?.cancel();
     _hintTimer = Timer(const Duration(milliseconds: 2200), () {
-      if (!_disposed) setState(() => _hintKeys.remove(target));
+      if (!_disposed) setState(() {
+        _hintKeys.remove(highlight);
+        // Keep the X marks permanently; only clear the temporary highlight.
+      });
     });
+    _snack('Hint: these cells cannot hold a rabbit — mark them with an X.');
   }
 
   Future<void> _useReveal() async {
@@ -613,28 +702,6 @@ class _GameScreenState extends State<GameScreen> {
     }
     final p = RulesEngine.parse(target);
     await _placeCat(p.row, p.col);
-  }
-
-  Future<void> _useUndo() async {
-    // Rabbits are locked once placed, so only X-mark history can be undone.
-    _history.removeWhere((h) => h['type'] == 'rabbit');
-    if (_history.isEmpty) {
-      _snack('Nothing to undo.');
-      return;
-    }
-    final ok = await _boosterProvider.consume(BoosterConfig.undo);
-    if (!ok) {
-      _snack('No Undo boosters — get more in the shop or watch an ad.');
-      return;
-    }
-    final last = _history.removeLast();
-    if (last['type'] == 'x') {
-      final p = RulesEngine.parse(last['key']!);
-      if (_markSet().contains(last['key']!)) {
-        _gameProvider.toggleXMark(p.row, p.col);
-      }
-    }
-    if (mounted) setState(() {});
   }
 
   void _snack(String msg) {
@@ -1415,7 +1482,6 @@ class _GameScreenState extends State<GameScreen> {
 
   Widget _buildBoosterBar() {
     final hintCount = _boosterProvider.getQuantity(BoosterConfig.hint);
-    final undoCount = _boosterProvider.getQuantity(BoosterConfig.undo);
     final revealCount = _boosterProvider.getQuantity(BoosterConfig.revealCell);
 
     return Padding(
@@ -1428,12 +1494,6 @@ class _GameScreenState extends State<GameScreen> {
             color: kOrange,
             count: hintCount,
             onTap: _useHint,
-          ),
-          _boosterButton(
-            icon: Icons.undo,
-            color: Colors.blueGrey,
-            count: undoCount,
-            onTap: _useUndo,
           ),
           _boosterButton(
             icon: Icons.visibility,
