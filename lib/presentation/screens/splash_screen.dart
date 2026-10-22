@@ -47,7 +47,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF7F0),
+      backgroundColor: const Color(0xFF1B2E1B),
       body: SafeArea(
         child: Column(
           children: [
@@ -61,7 +61,7 @@ class _SplashScreenState extends State<SplashScreen>
                 style: const TextStyle(
                   fontSize: 15,
                   fontStyle: FontStyle.italic,
-                  color: Color(0xFF8B6B6B),
+                  color: Colors.white,
                   height: 1.5,
                 ),
               ),
@@ -71,13 +71,13 @@ class _SplashScreenState extends State<SplashScreen>
             const RabbitIcon(
               size: 152,
               bodyColor: Colors.white,
-              outlineColor: Color(0xFF8B5CF6),
+              outlineColor: Color(0xFF38A169),
             ),
             const SizedBox(height: 12),
             const Text(
               'Bunny Doku',
               style: TextStyle(
-                color: Color(0xFF8B6B6B),
+                color: Colors.white,
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
               ),
@@ -85,7 +85,7 @@ class _SplashScreenState extends State<SplashScreen>
             const SizedBox(height: 6),
             const Text(
               'Rabbit Sudoku Puzzle',
-              style: TextStyle(color: Color(0xFFB89A94), fontSize: 14),
+              style: TextStyle(color: Color(0xFF68D391), fontSize: 14),
             ),
             const Spacer(),
             // Progress bar with walking rabbit

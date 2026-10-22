@@ -94,7 +94,7 @@ class RabitDokuApp extends StatelessWidget {
           ),
         ),
         ChangeNotifierProvider(
-          create: (_) => AdProvider(userRepo: userRepo),
+          create: (_) => AdProvider(userRepo),
         ),
         ChangeNotifierProvider(
           create: (_) => BoosterProvider(boosterRepo: boosterRepo),

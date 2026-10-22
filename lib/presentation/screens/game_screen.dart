@@ -23,10 +23,10 @@ import '../../utils/rules_engine.dart';
 bool get _isMobile => Platform.isAndroid || Platform.isIOS;
 
 /// Cream / mauve theme matching the reference game.
-const Color kCream = Color(0xFFFFF7F0);
-const Color kMauve = Color(0xFF8B6B6B);
-const Color kOrange = Color(0xFFF5A623);
-const Color kGold = Color(0xFFF0C419);
+const Color kCream = Color(0xFF1B2E1B);
+const Color kMauve = Color(0xFF2F855A);
+const Color kOrange = Color(0xFF38A169);
+const Color kGold = Color(0xFF68D391);
 
 /// The 10x10 Rabit_doku game board — Meowdoku-style controls & animations.
 ///

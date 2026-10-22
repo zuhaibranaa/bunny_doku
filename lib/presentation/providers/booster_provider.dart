@@ -3,16 +3,19 @@ import 'package:flutter/foundation.dart';
 import '../../data/repositories/booster_repository.dart';
 import '../../domain/entities/booster_entity.dart';
 import '../../config/booster_config.dart';
+import 'ad_provider.dart';
 
 class BoosterProvider extends ChangeNotifier {
   final BoosterRepository _boosterRepo;
+  final AdProvider? _adProvider;
 
   Map<String, int> _inventory = {};
   bool _isLoading = true;
   List<BoosterEntity> _boosters = [];
 
-  BoosterProvider({required BoosterRepository boosterRepo})
-      : _boosterRepo = boosterRepo;
+  BoosterProvider({required BoosterRepository boosterRepo, AdProvider? adProvider})
+      : _boosterRepo = boosterRepo,
+        _adProvider = adProvider;
 
   Map<String, int> get inventory => _inventory;
   List<BoosterEntity> get boosters => _boosters;
@@ -75,6 +78,16 @@ class BoosterProvider extends ChangeNotifier {
   }
 
   Future<void> buyBoosterWithAd(String boosterId) async {
-    await add(boosterId, 1);
+    if (_adProvider == null) {
+      await add(boosterId, 1);
+      return;
+    }
+    final shown = await _adProvider!.showRewardedAd((_, reward) async {
+      await add(boosterId, 1);
+    });
+    if (!shown) {
+      // Fallback to giving booster if ad fails
+      await add(boosterId, 1);
+    }
   }
 }

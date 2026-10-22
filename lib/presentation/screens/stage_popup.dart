@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../config/app_config.dart';
 import '../../domain/entities/stage_entity.dart';
+import 'game_screen.dart';
 
 /// Popup shown when tapping a stage node on the map.
 class StagePopup extends StatelessWidget {
@@ -21,6 +21,7 @@ class StagePopup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      backgroundColor: kCream,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -29,7 +30,7 @@ class StagePopup extends StatelessWidget {
           children: [
             Text(
               'Stage ${stage.id}',
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
             ),
             const SizedBox(height: 12),
             Row(
@@ -41,8 +42,8 @@ class StagePopup extends StatelessWidget {
                   stage.isSpecialStage ? 'SPECIAL - 1 Life' : 'Normal - 3 Lives',
                   style: TextStyle(
                     color: stage.isSpecialStage
-                        ? Colors.orange.shade700
-                        : Colors.green.shade700,
+                        ? Colors.orange.shade400
+                        : kGold,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -57,7 +58,7 @@ class StagePopup extends StatelessWidget {
                   (i) => Icon(
                     i < stars ? Icons.star : Icons.star_border,
                     size: 26,
-                    color: i < stars ? Colors.amber : Colors.grey.shade400,
+                    color: i < stars ? Colors.amber : Colors.grey.shade600,
                   ),
                 ),
               ),
@@ -74,6 +75,7 @@ class StagePopup extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
               ],
@@ -83,6 +85,7 @@ class StagePopup extends StatelessWidget {
               children: [
                 Expanded(
                   child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(foregroundColor: Colors.white, side: const BorderSide(color: Colors.white54)),
                     onPressed: onClose,
                     child: const Text('Close'),
                   ),
@@ -91,7 +94,7 @@ class StagePopup extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppConfig.rabbitPurple,
+                      backgroundColor: kOrange,
                       foregroundColor: Colors.white,
                     ),
                     onPressed: onPlay,

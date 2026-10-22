@@ -20,7 +20,7 @@ class AdProvider extends ChangeNotifier {
   bool _isBannerLoaded = false;
   String? _error;
 
-  AdProvider({required UserRepository userRepo}) : _userRepo = userRepo;
+  AdProvider([UserRepository? userRepo]) : _userRepo = userRepo ?? UserRepository();
 
   bool get isInterstitialLoaded => _isInterstitialLoaded;
   bool get isRewardedLoaded => _isRewardedLoaded;

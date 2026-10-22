@@ -80,7 +80,7 @@ class _MeadowPainter extends CustomPainter {
     _paintTrees(canvas, w, midY);
     _paintHill(canvas, w, nearY, h * 0.07, _hillNear, 0.7);
     _paintGrassDetails(canvas, w, h, nearY);
-    _paintRabbit(canvas, w, h, nearY);
+    // _paintRabbit(canvas, w, h, nearY);
     _paintButterflies(canvas, w, h, nearY);
   }
 

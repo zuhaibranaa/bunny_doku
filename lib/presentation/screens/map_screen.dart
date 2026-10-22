@@ -14,6 +14,11 @@ import '../../presentation/widgets/refill_countdown.dart';
 import '../../presentation/widgets/ad_banner_widget.dart';
 import '../../presentation/screens/stage_popup.dart';
 
+const Color kCream = Color(0xFF1B2E1B);
+const Color kMauve = Color(0xFF2F855A);
+const Color kOrange = Color(0xFF38A169);
+const Color kGold = Color(0xFF68D391);
+
 /// Candy Crush Saga-style stage selection map.
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -94,9 +99,10 @@ class _MapScreenState extends State<MapScreen> {
         final userRepo = context.read<UserRepository>();
 
         return Scaffold(
+          backgroundColor: kCream,
           appBar: AppBar(
             title: const Text('Bunny Doku'),
-            backgroundColor: const Color(0xFF8B5CF6),
+            backgroundColor: kMauve,
             foregroundColor: Colors.white,
             actions: [
               IconButton(

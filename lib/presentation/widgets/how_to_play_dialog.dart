@@ -6,10 +6,10 @@ import 'rabbit_icon.dart';
 import 'x_mark.dart';
 
 /// Cream / mauve theme shared with the game screen.
-const Color tCream = Color(0xFFFFF7F0);
-const Color tMauve = Color(0xFF8B6B6B);
-const Color tOrange = Color(0xFFF5A623);
-const Color tGold = Color(0xFFF0C419);
+const Color tCream = Color(0xFF1A1F2E);
+const Color tMauve = Color(0xFF6366F1);
+const Color tOrange = Color(0xFF22D3EE);
+const Color tGold = Color(0xFFA78BFA);
 
 /// What a tutorial mini-grid cell displays.
 enum _CellContent { empty, rabbit, badRabbit, xMark }
@@ -128,7 +128,7 @@ class _HowToPlayDialogState extends State<HowToPlayDialog>
       child: Container(
         constraints: const BoxConstraints(maxWidth: 420),
         decoration: BoxDecoration(
-          color: tCream,
+          color: const Color(0xFF1B2E1B),
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(

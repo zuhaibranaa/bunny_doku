@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../domain/entities/booster_entity.dart';
 import '../widgets/rabbit_icon.dart';
+import 'game_screen.dart';
 
 /// Shop screen where players buy boosters with money or ads.
 class BoosterShopScreen extends StatefulWidget {
@@ -40,9 +41,10 @@ class _BoosterShopScreenState extends State<BoosterShopScreen> {
     final onBuyWithCoins = widget.onBuyWithCoins;
 
     return Scaffold(
+      backgroundColor: kCream,
       appBar: AppBar(
         title: const Text('Booster Shop'),
-        backgroundColor: const Color(0xFF8B5CF6),
+        backgroundColor: kMauve,
         foregroundColor: Colors.white,
         actions: [
           Padding(
@@ -124,17 +126,20 @@ class _BoosterShopScreenState extends State<BoosterShopScreen> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Buy 3 Boosters for 100 Coins'),
+        backgroundColor: kCream,
+        title: const Text('Buy 3 Boosters for 100 Coins', style: TextStyle(color: Colors.white)),
+        contentTextStyle: const TextStyle(color: Colors.white),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Balance: $_balance coins'),
+            Text('Balance: $_balance coins', style: const TextStyle(color: Colors.white)),
             const SizedBox(height: 12),
             for (final b in widget.boosters)
               ListTile(
                 leading: _boosterIcon(b.id),
-                title: Text(b.name),
+                title: Text(b.name, style: const TextStyle(color: Colors.white)),
                 trailing: ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: kOrange, foregroundColor: Colors.white),
                   onPressed: _balance >= 100
                       ? () async {
                           final bought = await widget.onBuyWithCoins?.call(b.id);
@@ -155,7 +160,7 @@ class _BoosterShopScreenState extends State<BoosterShopScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
+            child: Text('Cancel', style: TextStyle(color: kGold)),
           ),
         ],
       ),
@@ -163,12 +168,14 @@ class _BoosterShopScreenState extends State<BoosterShopScreen> {
   }
   Widget _boosterIcon(String id) {
     if (id.contains('hint')) {
-      return const Icon(Icons.lightbulb_outline, color: Color(0xFF8B5CF6), size: 28);
+      return const Icon(Icons.lightbulb_outline, color: Color(0xFF38A169), size: 28);
     }
     if (id.contains('reveal')) {
       return const Icon(Icons.remove_red_eye, color: Colors.teal, size: 28);
     }
-    // undo booster is removed from UI
+    if (id.contains('extra_life')) {
+      return const Icon(Icons.favorite, color: Colors.pink, size: 28);
+    }
     return const RabbitIcon(size: 28);
   }
 }
