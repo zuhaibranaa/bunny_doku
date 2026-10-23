@@ -31,6 +31,14 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   bool _initialized = false;
 
+  /// Drives the map. Created lazily on the first data build so it can attach
+  /// with an initial offset close to the player's last unlocked stage.
+  ScrollController? _scrollController;
+
+  /// Last stage we auto-scrolled to, so a rebuild never yanks the map away
+  /// while the player is browsing. The map re-swipes when a new stage unlocks.
+  int? _autoScrolledStage;
+
   @override
   void initState() {
     super.initState();
@@ -38,6 +46,58 @@ class _MapScreenState extends State<MapScreen> {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
+  }
+
+  @override
+  void dispose() {
+    _scrollController?.dispose();
+    super.dispose();
+  }
+
+  /// Swipes the map up to the player's last unlocked stage.
+  ///
+  /// The very first time the controller attaches slightly *below* the target
+  /// so the map visibly slides (swipes) onto the level instead of jumping.
+  void _scrollToLastUnlocked(int unlockedStage, List<Offset> positions) {
+    if (positions.isEmpty || _autoScrolledStage == unlockedStage) return;
+
+    final index = (unlockedStage - 1).clamp(0, positions.length - 1);
+    final nodeCenterY = positions[index].dy;
+    final viewport = MediaQuery.of(context).size.height - 200;
+    final target = (nodeCenterY - viewport * 0.55).clamp(0.0, double.infinity);
+    _autoScrolledStage = unlockedStage;
+
+    if (_scrollController == null) {
+      // Start a little below the destination; post-frame animates the rest.
+      _scrollController = ScrollController(
+        initialScrollOffset: (target - 180).clamp(0.0, double.infinity),
+      );
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _animateToStage(nodeCenterY, viewport);
+    });
+  }
+
+  void _animateToStage(double nodeCenterY, double viewport) {
+    final controller = _scrollController;
+    if (!mounted || controller == null || !controller.hasClients) return;
+
+    final target = (nodeCenterY - viewport * 0.55).clamp(
+      0.0,
+      controller.position.maxScrollExtent,
+    );
+    final distance = (target - controller.offset).abs();
+    if (distance < 1) return;
+
+    // Scale the swipe with the distance so short hops feel snappy and long
+    // journeys stay readable instead of flashing past.
+    final ms = (420 + distance * 0.45).clamp(420, 1600).round();
+    controller.animateTo(
+      target,
+      duration: Duration(milliseconds: ms),
+      curve: Curves.easeInOutCubic,
+    );
   }
 
   @override
@@ -108,6 +168,9 @@ class _MapScreenState extends State<MapScreen> {
         final positions = _getNodePositions(stages.length);
         final userRepo = context.read<UserRepository>();
 
+        // Open straight onto the player's last unlocked level.
+        _scrollToLastUnlocked(unlocked, positions);
+
         return Scaffold(
           backgroundColor: kCream,
           body: Stack(
@@ -153,6 +216,7 @@ class _MapScreenState extends State<MapScreen> {
                   const SizedBox(height: 12),
                   Expanded(
                     child: SingleChildScrollView(
+                      controller: _scrollController,
                       child: ConstrainedBox(
                         constraints: BoxConstraints(
                           minHeight: MediaQuery.of(context).size.height - 200,
