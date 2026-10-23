@@ -12,7 +12,7 @@ const Color tOrange = Color(0xFF22D3EE);
 const Color tGold = Color(0xFFA78BFA);
 
 /// What a tutorial mini-grid cell displays.
-enum _CellContent { empty, rabbit, badRabbit, xMark }
+enum _CellContent { empty, bunny, badBunny, xMark }
 
 /// One cell of a tutorial mini-grid.
 class _Cell {
@@ -380,7 +380,7 @@ class _MiniGrid extends StatelessWidget {
 
   Widget _content(_Cell cell, double size, double eased, double t) {
     switch (cell.content) {
-      case _CellContent.rabbit:
+      case _CellContent.bunny:
         return Transform.scale(
           scale: 0.4 + 0.6 * eased,
           child: Opacity(
@@ -388,8 +388,8 @@ class _MiniGrid extends StatelessWidget {
             child: RabbitIcon(size: size * 0.62),
           ),
         );
-      case _CellContent.badRabbit:
-        // Offending rabbit: tinted red and gently shaking.
+      case _CellContent.badBunny:
+        // Offending bunny: tinted red and gently shaking.
         return Transform.scale(
           scale: 0.4 + 0.6 * eased,
           child: Opacity(
@@ -429,49 +429,49 @@ class _MiniGrid extends StatelessWidget {
 final List<_Step> _steps = [
   _Step(
     badge: 'RULE 1',
-    title: 'One rabbit per colour region',
+    title: 'One bunny per colour region',
     caption:
-        'Every coloured region holds exactly one rabbit. Place a rabbit in each region to fill the board.',
+        'Every coloured region holds exactly one bunny. Place a second bunny in the same region and it\'ll be marked wrong.',
     grid: const [
-      [_Cell(0), _Cell(0), _Cell(1), _Cell(1)],
-      [_Cell(0), _Cell(0), _Cell(1), _Cell(1)],
+      [_Cell(0, _CellContent.bunny), _Cell(0), _Cell(1), _Cell(1)],
+      [_Cell(0, _CellContent.badBunny), _Cell(0), _Cell(1), _Cell(1)],
       [_Cell(2), _Cell(2), _Cell(3), _Cell(3)],
       [_Cell(2), _Cell(2), _Cell(3), _Cell(3)],
     ],
   ),
   _Step(
     badge: 'RULE 2',
-    title: 'One rabbit per row',
+    title: 'One bunny per row',
     caption:
-        'No two rabbits may share a row. A second rabbit in the same row is never allowed.',
+        'No two bunnies may share a row. Watch as placing a second bunny in the same row triggers a red error.',
     grid: const [
-      [_Cell(0, _CellContent.rabbit), _Cell(0), _Cell(1), _Cell(1)],
-      [_Cell(2, _CellContent.badRabbit), _Cell(2), _Cell(1), _Cell(1)],
-      [_Cell(3), _Cell(3), _Cell(1, _CellContent.rabbit), _Cell(1)],
+      [_Cell(0, _CellContent.bunny), _Cell(0), _Cell(1), _Cell(1)],
+      [_Cell(0, _CellContent.badBunny), _Cell(2), _Cell(1), _Cell(1)],
+      [_Cell(3), _Cell(3), _Cell(1), _Cell(1)],
       [_Cell(3), _Cell(3), _Cell(2), _Cell(2)],
     ],
   ),
   _Step(
     badge: 'RULE 3',
-    title: 'One rabbit per column',
+    title: 'One bunny per column',
     caption:
-        'No two rabbits may share a column either. Every column holds exactly one.',
+        'No two bunnies may share a column. Placing a second bunny in the same column causes an error.',
     grid: const [
-      [_Cell(0, _CellContent.rabbit), _Cell(1), _Cell(2), _Cell(2)],
+      [_Cell(0, _CellContent.bunny), _Cell(1), _Cell(2), _Cell(2)],
       [_Cell(3), _Cell(1), _Cell(2), _Cell(2)],
-      [_Cell(3), _Cell(4, _CellContent.rabbit), _Cell(2), _Cell(2)],
+      [_Cell(0, _CellContent.badBunny), _Cell(4), _Cell(2), _Cell(2)],
       [_Cell(5), _Cell(5), _Cell(5), _Cell(5)],
     ],
   ),
   _Step(
     badge: 'RULE 4',
-    title: 'No touching rabbits',
+    title: 'No touching bunnies',
     caption:
-        'Rabbits may not sit side by side or diagonally. Even a corner touch is illegal.',
+        'Bunnies may not sit side by side or diagonally. Even a corner touch is illegal and shows as an error.',
     grid: const [
       [_Cell(0), _Cell(1), _Cell(2), _Cell(3)],
-      [_Cell(0), _Cell(1, _CellContent.rabbit), _Cell(2), _Cell(3)],
-      [_Cell(4), _Cell(4), _Cell(5, _CellContent.badRabbit), _Cell(5)],
+      [_Cell(0), _Cell(1, _CellContent.bunny), _Cell(2), _Cell(3)],
+      [_Cell(4), _Cell(4), _Cell(5, _CellContent.badBunny), _Cell(5)],
       [_Cell(4), _Cell(4), _Cell(5), _Cell(5)],
     ],
   ),
@@ -479,11 +479,11 @@ final List<_Step> _steps = [
     badge: 'CONTROLS',
     title: 'How to place and mark',
     caption:
-        'Double-tap a cell to place a rabbit. Tap or swipe across cells to mark them with an X, and tap the X again to clear it. A found rabbit is locked in place.',
+        'Double-tap a cell to place a bunny. Tap or swipe across cells to mark them with an X, and tap the X again to clear it. A placed or starter) bunny is locked in place.',
     grid: const [
-      [_Cell(0, _CellContent.rabbit), _Cell(1), _Cell(2, _CellContent.xMark), _Cell(3)],
+      [_Cell(0, _CellContent.bunny), _Cell(1), _Cell(2, _CellContent.xMark), _Cell(3)],
       [_Cell(0), _Cell(1), _Cell(2), _Cell(3)],
-      [_Cell(4), _Cell(4, _CellContent.rabbit), _Cell(5), _Cell(5)],
+      [_Cell(4), _Cell(4, _CellContent.bunny), _Cell(5), _Cell(5)],
       [_Cell(4), _Cell(4), _Cell(5), _Cell(5)],
     ],
   ),

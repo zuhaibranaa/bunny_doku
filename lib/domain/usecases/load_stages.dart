@@ -19,8 +19,8 @@ class LoadStagesUseCase {
               difficulty: m.difficulty,
               isSpecial: m.isSpecial,
               regionGrid: m.regionGrid,
-              starterRabbitRow: m.starterRabbitRow,
-              starterRabbitCol: m.starterRabbitCol,
+              starterBunnyRow: m.starterBunnyRow,
+              starterBunnyCol: m.starterBunnyCol,
               solution: m.solution,
             ))
         .toList();

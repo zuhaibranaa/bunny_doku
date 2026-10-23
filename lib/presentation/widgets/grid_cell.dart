@@ -5,15 +5,15 @@ import 'x_mark.dart';
 
 /// A single cell in the 10x10 game grid (Meowdoku style).
 ///
-/// Cells are solid region-colored tiles. A white X marks "no rabbit here",
+/// Cells are solid region.*bunny here",
 /// a red X marks a cell where a wrong placement was attempted, and a cute
-/// white rabbit shows a placed rabbit. Pop / shake / flash animations are
+/// white bunny shows a placed or starter) bunny. Pop / shake / flash animations are
 /// driven by the parent via keyed TweenAnimationBuilders.
 class GridCell extends StatelessWidget {
   final int row;
   final int col;
   final int regionId;
-  final bool hasRabbit; // player-placed (or starter) rabbit
+  final bool hasBunny; // player-placed (or placed or starter) bunny
   final bool isStarter;
   final bool hasXMark;
   final bool isWrongMarked; // auto red X after a wrong placement attempt
@@ -28,7 +28,7 @@ class GridCell extends StatelessWidget {
     required this.row,
     required this.col,
     required this.regionId,
-    required this.hasRabbit,
+    required this.hasBunny,
     required this.isStarter,
     required this.hasXMark,
     this.isWrongMarked = false,
@@ -55,9 +55,9 @@ class GridCell extends StatelessWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            if (hasRabbit)
+            if (hasBunny)
               TweenAnimationBuilder<double>(
-                key: ValueKey('rabbit-$row-$col'),
+                key: ValueKey('bunny-$row-$col'),
                 tween: Tween(begin: 0, end: 1),
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeOutBack,

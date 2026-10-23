@@ -4,7 +4,7 @@ class GameStateEntity {
   final int heartsRemaining;
   final int livesStart;
   final bool isSpecial;
-  final Set<({int row, int col})> placedRabbits;
+  final Set<({int row, int col})> placedBunnies;
   final Set<({int row, int col})> xMarks;
   final DateTime startedAt;
   int? hintsUsed;
@@ -15,7 +15,7 @@ class GameStateEntity {
     required this.heartsRemaining,
     required this.livesStart,
     required this.isSpecial,
-    required this.placedRabbits,
+    required this.placedBunnies,
     required this.xMarks,
     required this.startedAt,
   });

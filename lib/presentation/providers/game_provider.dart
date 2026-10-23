@@ -62,12 +62,12 @@ class GameProvider extends ChangeNotifier {
         'heartsRemaining': stageHearts,
         'livesStart': stageHearts,
         'isSpecial': isSpecial,
-        'placedRabbits': <String>[],
+        'placedBunnies': <String>[],
         'xMarks': <String>[],
         'startedAt': DateTime.now(),
       };
 
-      // Add the starter rabbit only when the stage defines one (-1 = none).
+      // Add the starter bunny only when the stage defines one (-1 = none).
       final size = regionGrid.isEmpty ? 0 : regionGrid.length;
       final hasStarter = _starterRow >= 0 &&
           _starterCol >= 0 &&
@@ -76,7 +76,7 @@ class GameProvider extends ChangeNotifier {
       if (hasStarter) {
         _gameState = {
           ..._gameState!,
-          'placedRabbits': <String>[
+          'placedBunnies': <String>[
             RulesEngine.key(_starterRow, _starterCol)
           ],
         };
@@ -89,28 +89,28 @@ class GameProvider extends ChangeNotifier {
     }
   }
 
-  /// Places or removes a rabbit at [row],[col].
+  /// Places or removes a bunny at [row],[col].
   /// Returns 'placed', 'removed', 'starter' (locked) or 'ignored'.
   /// The caller is responsible for legality checks ([RulesEngine.isLegalPlacement])
   /// and for heart loss on illegal attempts.
-  Future<String> toggleRabbit(int row, int col) async {
+  Future<String> toggleBunny(int row, int col) async {
     if (_gameState == null) return 'ignored';
 
     try {
       // Defensive type casting - elements might not be Strings
-      final rawPlacements = _gameState!['placedRabbits'] as List? ?? <dynamic>[];
+      final rawPlacements = _gameState!['placedBunnies'] as List? ?? <dynamic>[];
       final placements = Set<String>.from(rawPlacements.whereType<String>());
       final key = RulesEngine.key(row, col);
       final isStarter = row == _starterRow && col == _starterCol;
 
-      // Cannot remove starter rabbit
+      // Cannot remove starter bunny
       if (placements.contains(key) && isStarter) {
         return 'starter';
       }
 
       String result;
       if (placements.contains(key)) {
-        // Remove rabbit
+        // Remove bunny
         placements.remove(key);
         result = 'removed';
       } else {
@@ -120,7 +120,7 @@ class GameProvider extends ChangeNotifier {
 
       _gameState = {
         ..._gameState!,
-        'placedRabbits': placements.toList(),
+        'placedBunnies': placements.toList(),
       };
       notifyListeners();
       return result;
@@ -141,7 +141,7 @@ class GameProvider extends ChangeNotifier {
         marks.remove(key);
       } else {
         // Don't allow X on cells with rabbits
-        final placed = Set<String>.from(_gameState!['placedRabbits'] ?? <String>[]);
+        final placed = Set<String>.from(_gameState!['placedBunnies'] ?? <String>[]);
         if (!placed.contains(key)) {
           marks.add(key);
         }
@@ -219,7 +219,7 @@ class GameProvider extends ChangeNotifier {
   Set<String> getBlockedCells(int row, int col) {
     if (_gameState == null) return {};
     if (_regionGrid.isEmpty) return {};
-    final rawPlacements = _gameState!['placedRabbits'] as List? ?? [];
+    final rawPlacements = _gameState!['placedBunnies'] as List? ?? [];
     final placements = Set<String>.from(rawPlacements.whereType<String>());
     return _rulesEngine.getBlockedCells(row, col, placements);
   }

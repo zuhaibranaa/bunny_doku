@@ -13,10 +13,11 @@ class RulesEngine {
   static String key(int row, int col) => '$row,$col';
 
   /// Number of distinct colored regions on the board. A solved board holds
-  /// exactly one rabbit per region, so this is also the rabbit target count.
+  /// exactly one bunny per region, so this is also the bunny target count.
   int get regionCount => regionGrid.expand((row) => row).toSet().length;
 
-  /// Expected rabbit count for a solved board.
+  /// Expected bunny count for a solved board.
+  int get bunnyCount => regionCount;
   int get rabbitCount => regionCount;
 
   /// Parses a position key back to row and col.
@@ -25,13 +26,13 @@ class RulesEngine {
     return (row: int.parse(parts[0]), col: int.parse(parts[1]));
   }
 
-  /// Returns true if placing a rabbit at [row],[col] is legal given
+  /// Returns true if placing a bunny at [row],[col] is legal given
   /// existing [placements] (Set of position keys).
   bool isLegalPlacement(int row, int col, Set<String> placements) {
-    // Rule 1: one rabbit per row
+    // Rule 1: one bunny per row
     if (placements.any((k) => parse(k).row == row)) return false;
 
-    // Rule 2: one rabbit per column
+    // Rule 2: one bunny per column
     if (placements.any((k) => parse(k).col == col)) return false;
 
     // Rule 3: no diagonal adjacency (8 surrounding cells)
@@ -42,7 +43,7 @@ class RulesEngine {
       if (dr <= 1 && dc <= 1 && !(dr == 0 && dc == 0)) return false;
     }
 
-    // Rule 4: one rabbit per region (color)
+    // Rule 4: one bunny per region (color)
     final regionId = regionGrid[row][col];
     if (placements.any((k) => regionGrid[parse(k).row][parse(k).col] == regionId)) {
       return false;
@@ -52,16 +53,16 @@ class RulesEngine {
   }
 
   /// Returns true if the board is fully solved:
-  /// every region has exactly one rabbit and all rules hold.
+  /// every region has exactly one bunny and all rules hold.
   bool isSolved(Set<String> placements) {
-    if (placements.length != rabbitCount) return false;
+    if (placements.length != bunnyCount) return false;
 
-    final regionsWithRabbit = <int>{};
+    final regionsWithBunny = <int>{};
     for (final k in placements) {
       final p = parse(k);
-      regionsWithRabbit.add(regionGrid[p.row][p.col]);
+      regionsWithBunny.add(regionGrid[p.row][p.col]);
     }
-    if (regionsWithRabbit.length != rabbitCount) return false;
+    if (regionsWithBunny.length != bunnyCount) return false;
 
     final list = placements.toList();
     for (int i = 0; i < list.length; i++) {
@@ -88,7 +89,7 @@ class RulesEngine {
     }
 
     final total = gridSize * gridSize;
-    final target = rabbitCount;
+    final target = bunnyCount;
 
     bool backtrack(int index) {
       if (placed.length == target) return true;
@@ -119,7 +120,7 @@ class RulesEngine {
     return r >= 0 && r < gridSize && c >= 0 && c < gridSize;
   }
 
-  /// Returns all cells blocked by placing a rabbit at [row],[col]
+  /// Returns all cells blocked by placing a bunny at [row],[col]
   /// (same row, same column, 8 neighbors, same region).
   Set<String> getBlockedCells(int row, int col, Set<String> placements) {
     final blocked = <String>{};

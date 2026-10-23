@@ -44,8 +44,8 @@ class DifficultyConfig {
   static int gridSizeForStage(int stageNumber) =>
       maxGridSizeForStage(stageNumber);
 
-  /// A solved board holds one rabbit per region, and regionCount == board size.
-  static int requiredRabbitsForSize(int gridSize) => gridSize;
+  /// A solved board holds one bunny per region, and regionCount == board size.
+  static int requiredBunniesForSize(int gridSize) => gridSize;
 
   static bool isSpecialForStage(int stageNumber) => stageNumber % 10 == 0;
 }

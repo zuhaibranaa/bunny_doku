@@ -1,6 +1,6 @@
 import '../../utils/rules_engine.dart';
 
-/// Validates a rabbit placement against game rules.
+/// Validates a bunny placement against game rules.
 class ValidatePlacementUseCase {
   final RulesEngine rulesEngine;
 

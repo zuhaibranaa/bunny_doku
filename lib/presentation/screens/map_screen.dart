@@ -82,8 +82,8 @@ class _MapScreenState extends State<MapScreen> {
           Navigator.pushNamed(context, '/game', arguments: {
             'id': stage.id,
             'regionGrid': stage.regionGrid,
-            'starterRabbitRow': stage.starterRabbitRow,
-            'starterRabbitCol': stage.starterRabbitCol,
+            'starterBunnyRow': stage.starterBunnyRow,
+            'starterBunnyCol': stage.starterBunnyCol,
             'solution': stage.solution,
             'isSpecial': stage.isSpecialStage,
           });
@@ -112,7 +112,7 @@ class _MapScreenState extends State<MapScreen> {
           backgroundColor: kCream,
           body: Stack(
             children: [
-              // Always-on animated meadow: a rabbit hopping through
+              // Always-on animated meadow: a bunny hopping through
               // greenery. It loops forever and cannot be paused.
               const Positioned.fill(child: MapBackground()),
               Column(
@@ -151,48 +151,47 @@ class _MapScreenState extends State<MapScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minHeight: MediaQuery.of(context).size.height - 200,
-                      ),
-                      child: Stack(
-                        children: [
-                          if (positions.length >= 2)
-                            CustomPaint(
-                              size: Size(
-                                MediaQuery.of(context).size.width,
-                                positions.last.dy + 120,
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: MediaQuery.of(context).size.height - 200,
+                        ),
+                        child: Stack(
+                          children: [
+                            if (positions.length >= 2)
+                              CustomPaint(
+                                size: Size(
+                                  MediaQuery.of(context).size.width,
+                                  positions.last.dy + 120,
+                                ),
+                                painter: MapPathPainter(points: positions),
                               ),
-                              painter: MapPathPainter(points: positions),
-                            ),
-                          ...List.generate(stages.length, (index) {
-                            final stage = stages[index];
-                            final pos = positions[index];
-                            final isUnlocked = stage.id <= unlocked;
-                            final isCompleted = index < unlocked - 1;
+                            ...List.generate(stages.length, (index) {
+                              final stage = stages[index];
+                              final pos = positions[index];
+                              final isUnlocked = stage.id <= unlocked;
+                              final isCompleted = index < unlocked - 1;
 
-                            return Positioned(
-                              left: pos.dx - 28,
-                              top: pos.dy - 28,
-                              child: StageNode(
-                                stageId: stage.id,
-                                isUnlocked: isUnlocked,
-                                isCompleted: isCompleted,
-                                isSpecial: stage.isSpecialStage,
-                                stars: stageProvider.getStarsForStage(stage.id),
-                                onTap: isUnlocked
-                                    ? () => _showStagePopup(context, stage)
-                                    : null,
-                              ),
-                            );
-                          }),
-                        ],
+                              return Positioned(
+                                left: pos.dx - 28,
+                                top: pos.dy - 28,
+                                child: StageNode(
+                                  stageId: stage.id,
+                                  isUnlocked: isUnlocked,
+                                  isCompleted: isCompleted,
+                                  isSpecial: stage.isSpecialStage,
+                                  stars: stageProvider.getStarsForStage(stage.id),
+                                  onTap: isUnlocked
+                                      ? () => _showStagePopup(context, stage)
+                                      : null,
+                                ),
+                              );
+                            }),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
                   ),
                   if (!(userRepo.getCurrentUser()?.isAdsRemoved ?? false))
                     const AdBannerWidget(),

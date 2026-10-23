@@ -5,9 +5,9 @@ class StageModel {
   final String difficulty;
   final bool isSpecial;
   final List<List<int>> regionGrid; // square, size 3..10, values 0..n-1
-  final int starterRabbitRow;
-  final int starterRabbitCol; // -1 / -1 means "no locked starter"
-  final List<String> solution; // authoritative "row,col" rabbit positions
+  final int starterBunnyRow;
+  final int starterBunnyCol; // -1 / -1 means "no locked starter"
+  final List<String> solution; // authoritative "row,col" bunny positions
 
   StageModel({
     required this.id,
@@ -15,8 +15,8 @@ class StageModel {
     required this.difficulty,
     required this.isSpecial,
     required this.regionGrid,
-    required this.starterRabbitRow,
-    required this.starterRabbitCol,
+    required this.starterBunnyRow,
+    required this.starterBunnyCol,
     this.solution = const [],
   });
 
@@ -36,8 +36,8 @@ class StageModel {
       difficulty: json['difficulty'].toString(),
       isSpecial: json['isSpecial'] as bool? ?? false,
       regionGrid: grid,
-      starterRabbitRow: (json['starterRabbitRow'] as int?) ?? -1,
-      starterRabbitCol: (json['starterRabbitCol'] as int?) ?? -1,
+      starterBunnyRow: (json['starterBunnyRow'] as int?) ?? -1,
+      starterBunnyCol: (json['starterBunnyCol'] as int?) ?? -1,
       solution: solution,
     );
   }
@@ -48,16 +48,16 @@ class StageModel {
         'difficulty': difficulty,
         'isSpecial': isSpecial,
         'regionGrid': regionGrid,
-        'starterRabbitRow': starterRabbitRow,
-        'starterRabbitCol': starterRabbitCol,
+        'starterBunnyRow': starterBunnyRow,
+        'starterBunnyCol': starterBunnyCol,
         'solution': solution,
       };
 
   /// Number of distinct regions (colors) on this board.
   int get regionCount => regionGrid.expand((row) => row).toSet().length;
 
-  /// Whether this stage ships a locked starter rabbit.
-  bool get hasStarter => starterRabbitRow >= 0 && starterRabbitCol >= 0;
+  /// Whether this stage ships a locked starter bunny.
+  bool get hasStarter => starterBunnyRow >= 0 && starterBunnyCol >= 0;
 
   /// Checks if this is a special stage (every 10th).
   bool get isSpecialStage => id % 10 == 0;

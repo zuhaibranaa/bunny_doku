@@ -10,7 +10,7 @@ class BoosterConfig {
     {
       'id': hint,
       'name': 'Hint',
-      'description': 'Highlights a valid cell to place a rabbit.',
+      'description': 'Highlights a valid cell to place a bunny.',
       'icon': 'assets/images/booster/hint.svg',
       'priceUsd': 0.99,
       'priceAd': true, // can be bought by watching an ad
@@ -28,7 +28,7 @@ class BoosterConfig {
     {
       'id': revealCell,
       'name': 'Reveal Cell',
-      'description': 'Reveals the correct rabbit position in one region.',
+      'description': 'Reveals the correct bunny position in one region.',
       'icon': 'assets/images/booster/reveal.svg',
       'priceUsd': 1.99,
       'priceAd': false, // IAP only

@@ -32,8 +32,8 @@ const Color kGold = Color(0xFF68D391);
 ///
 /// Controls (same as the reference game):
 ///  - Single tap on an empty cell  -> place / erase a white X mark (free)
-///  - Single tap on a placed rabbit -> remove it (starter is locked)
-///  - Double-tap on an empty cell  -> try to place a rabbit;
+///  - Single tap on a placed or starter) bunny -> remove it (starter is locked)
+///  - Double-tap on an empty cell  -> try to place a bunny;
 ///    illegal placement = shake + red flash + one heart lost
 class GameScreen extends StatefulWidget {
   static const routeName = '/game';
@@ -159,8 +159,8 @@ class _GameScreenState extends State<GameScreen> {
         _stage = args;
         _parseGrid(args);
 
-        final sr = args['starterRabbitRow'] as int?;
-        final sc = args['starterRabbitCol'] as int?;
+        final sr = args['starterBunnyRow'] as int?;
+        final sc = args['starterBunnyCol'] as int?;
         _hasStarter = sr != null && sc != null && sr >= 0 && sc >= 0 &&
             sr < _gridSize && sc < _gridSize;
         _starterRow = _hasStarter ? sr! : -1;
@@ -290,11 +290,11 @@ class _GameScreenState extends State<GameScreen> {
           children: [
             Text('You got 3 of each booster for free!', style: TextStyle(color: kMauve)),
             SizedBox(height: 6),
-            Text('• Hint - reveals a correct rabbit', style: TextStyle(color: kMauve)),
+            Text('• Hint - reveals a correct bunny', style: TextStyle(color: kMauve)),
             SizedBox(height: 6),
             Text('• Undo - reverses your last move', style: TextStyle(color: kMauve)),
             SizedBox(height: 6),
-            Text('• Reveal Cell - shows a rabbit position', style: TextStyle(color: kMauve)),
+            Text('• Reveal Cell - shows a bunny position', style: TextStyle(color: kMauve)),
             SizedBox(height: 6),
             Text('• Later buy 3 boosters for 100 coins of your choice', style: TextStyle(color: kMauve)),
           ],
@@ -329,7 +329,7 @@ class _GameScreenState extends State<GameScreen> {
   Set<String> _placedSet() {
     final state = _gameProvider.gameState;
     if (state == null) return <String>{};
-    final raw = state['placedRabbits'] as List? ?? <dynamic>[];
+    final raw = state['placedBunnies'] as List? ?? <dynamic>[];
     return Set<String>.from(raw.whereType<String>());
   }
 
@@ -370,7 +370,7 @@ class _GameScreenState extends State<GameScreen> {
       final placed = _placedSet();
 
       if (placed.contains(key)) {
-        // Every found rabbit is locked: once a rabbit from the solution is
+        // Every found bunny is locked: once a bunny from the solution is
         // placed, it can never be removed (not just the starter). Tap just
         // gives a gentle nudge.
         setState(() => _shakeCounts[key] = (_shakeCounts[key] ?? 0) + 1);
@@ -439,7 +439,7 @@ class _GameScreenState extends State<GameScreen> {
   ///
   /// The first cell touched decides the whole swipe: if it was unmarked the
   /// drag *selects* (marks X on) every cell it crosses, and if it was already
-  /// marked the drag *deselects* (erases) every cell it crosses. Rabbits and
+  /// marked the drag *deselects* (erases) every cell it crosses. Bunnies and
   /// red wrong-marks are never touched.
   void _markCellAt(Offset global) {
     final cell = _cellAt(global);
@@ -448,7 +448,7 @@ class _GameScreenState extends State<GameScreen> {
     final col = cell[1];
     final key = RulesEngine.key(row, col);
 
-    if (_placedSet().contains(key)) return; // never cover a rabbit
+    if (_placedSet().contains(key)) return; // never cover a bunny
     if (_wrongCells.contains(key)) return; // already red-marked
     if (_swipedCells.contains(key)) return; // already handled this drag
     _swipedCells.add(key);
@@ -466,7 +466,7 @@ class _GameScreenState extends State<GameScreen> {
     }
   }
 
-  /// Double-tap placement attempt: legal -> rabbit pops in + score,
+  /// Double-tap placement attempt: legal -> bunny pops in + score,
   /// illegal -> shake + red flash + one heart lost.
   Future<void> _tryPlaceCat(int row, int col) async {
     final key = RulesEngine.key(row, col);
@@ -496,9 +496,9 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Future<void> _placeCat(int row, int col) async {
-    final result = await _gameProvider.toggleRabbit(row, col);
+    final result = await _gameProvider.toggleBunny(row, col);
     if (result != 'placed') return;
-    // No rabbit history entry: every rabbit that lands is part of the
+    // No bunny history entry: every bunny that lands is part of the
     // solution and is locked, so there is nothing to undo for it.
     if (!mounted) return;
 
@@ -583,7 +583,7 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   /// Evaluate the current board and return the set of cell keys that are
-  /// definitively wrong (cannot hold a rabbit) based on the current placement
+  /// definitively wrong (cannot hold a bunny) based on the current placement
   /// and the solution. These cells should be marked with an X.
   Set<String> _evaluateWrongCells() {
     final wrong = <String>{};
@@ -596,7 +596,7 @@ class _GameScreenState extends State<GameScreen> {
       final r = int.parse(parts[0]);
       final c = int.parse(parts[1]);
 
-      // Same row: all other cells in this row are wrong (another rabbit here would break the rule)
+      // Same row: all other cells in this row are wrong (another bunny here would break the rule)
       for (int cc = 0; cc < _gridSize; cc++) {
         final other = RulesEngine.key(r, cc);
         if (!other.contains(k) && !placed.contains(other)) {
@@ -667,7 +667,7 @@ class _GameScreenState extends State<GameScreen> {
       _hintTimer = Timer(const Duration(milliseconds: 2200), () {
         if (!_disposed) setState(() => _hintKeys.remove(target));
       });
-      _snack('Hint: the next rabbit must go in this cell.');
+      _snack('Hint: the next bunny must go in this cell.');
       return;
     }
 
@@ -686,7 +686,7 @@ class _GameScreenState extends State<GameScreen> {
         // Keep the X marks permanently; only clear the temporary highlight.
       });
     });
-    _snack('Hint: these cells cannot hold a rabbit — mark them with an X.');
+    _snack('Hint: these cells cannot hold a bunny — mark them with an X.');
   }
 
   Future<void> _useReveal() async {
@@ -852,8 +852,8 @@ class _GameScreenState extends State<GameScreen> {
                   nav.pushNamed(GameScreen.routeName, arguments: {
                     'id': next.id,
                     'regionGrid': next.regionGrid,
-                    'starterRabbitRow': next.starterRabbitRow,
-                    'starterRabbitCol': next.starterRabbitCol,
+                    'starterBunnyRow': next.starterBunnyRow,
+                    'starterBunnyCol': next.starterBunnyCol,
                     'isSpecial': next.isSpecialStage,
                   });
                 },
@@ -1235,7 +1235,7 @@ class _GameScreenState extends State<GameScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // In-stage hearts as golden rabbits (3 normal / 1 special).
+          // In-stage hearts as golden bunnys (3 normal / 1 special).
           // These are the ONLY lives inside a stage — the 5-life pool
           // lives on the map and is spent when a stage starts.
           TweenAnimationBuilder<double>(
@@ -1264,10 +1264,10 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
-  /// Fixed-height row of rabbit slots — one per region, always visible.
+  /// Fixed-height row of bunny slots — one per region, always visible.
   ///
-  /// A slot starts as a faint outline and fills with a golden rabbit once the
-  /// matching region's rabbit is found, so the row never changes height.
+  /// A slot starts as a faint outline and fills with a golden bunny once the
+  /// matching region.*bunny is found, so the row never changes height.
   Widget _buildProgressStrip(Set<String> placed) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -1344,7 +1344,7 @@ class _GameScreenState extends State<GameScreen> {
 
           final regionId = _regionGrid[row][col];
           final cellKey = RulesEngine.key(row, col);
-          final hasRabbit = placed.contains(cellKey);
+          final hasBunny = placed.contains(cellKey);
           final hasXMark = marks.contains(cellKey);
           final isStarter =
               _hasStarter && row == _starterRow && col == _starterCol;
@@ -1356,10 +1356,10 @@ class _GameScreenState extends State<GameScreen> {
             row: row,
             col: col,
             regionId: regionId,
-            hasRabbit: hasRabbit,
+            hasBunny: hasBunny,
             isStarter: isStarter,
-            hasXMark: hasRabbit ? false : hasXMark,
-            isWrongMarked: !hasRabbit && _wrongCells.contains(cellKey),
+            hasXMark: hasBunny ? false : hasXMark,
+            isWrongMarked: !hasBunny && _wrongCells.contains(cellKey),
             regionColor: AppConfig.regionColors[
                 regionId.clamp(0, AppConfig.regionColors.length - 1)],
             isHinted: hinted,

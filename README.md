@@ -1,6 +1,6 @@
 # 🐰 Bunnoku
 
-A rabbit-themed logic puzzle game for Android and iOS — a Sudoku-variant where you place rabbits on a coloured grid, one puzzle region at a time.
+A rabbit-themed logic puzzle game for Android and iOS — a Sudoku-variant where you place bunnies on a coloured grid, one puzzle region at a time.
 
 Built with **Flutter** using a clean, layered architecture, and shipped with **1000 hand-verified puzzle stages**.
 
@@ -8,16 +8,16 @@ Built with **Flutter** using a clean, layered architecture, and shipped with **1
 
 ## 🎯 The Game
 
-Each stage is a square board divided into coloured regions. Place one rabbit in every region such that:
+Each stage is a square board divided into coloured regions. Place one bunny in every region such that:
 
 | Rule | Description |
 |------|-------------|
-| 🐇 One per row | No two rabbits share a row |
-| 🐇 One per column | No two rabbits share a column |
+| 🐇 One per row | No two bunnies share a row |
+| 🐇 One per column | No two bunnies share a column |
 | 🐇 No diagonal touch | Rabbits may not sit diagonally adjacent |
-| 🐇 One per region | Every coloured region holds exactly one rabbit |
+| 🐇 One per region | Every coloured region holds exactly one bunny |
 
-A rabbit is a "queen" — it attacks along rows, columns and diagonals — but each colour region is a cage that admits exactly one rabbit.
+A bunny is a "queen" — it attacks along rows, columns and diagonals — but each colour region is a cage that admits exactly one bunny.
 
 ---
 
@@ -74,7 +74,7 @@ flutter test
 - board sizes stay inside their difficulty band
 - the bundled solution is valid, and is the **only** rule-legal solution
 - sampled stages are solvable from scratch and with their starter rabbit
-- starter rabbits (where present) are part of the bundled solution
+- starter bunnies (where present) are part of the bundled solution
 - special stages occur exactly every 10th stage
 - every stage is a distinct level
 - the first stages use the gentlest 5×5 boards

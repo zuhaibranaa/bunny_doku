@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../widgets/rabbit_icon.dart';
 
-/// Splash / loading screen with a rabbit quote and a walking rabbit that
+/// Splash / loading screen with a bunny quote and a walking bunny that
 /// traverses the progress bar (same style as the reference game).
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -20,7 +20,7 @@ class _SplashScreenState extends State<SplashScreen>
   static const List<String> _quotes = [
     'Play for 30 minutes daily, you\'ll solve any puzzle with ease.',
     'A calm mind hops further than a fast one.',
-    'Every rabbit starts with a single hop.',
+    'Every bunny starts with a single hop.',
   ];
 
   @override
@@ -84,11 +84,11 @@ class _SplashScreenState extends State<SplashScreen>
             ),
             const SizedBox(height: 6),
             const Text(
-              'Rabbit Sudoku Puzzle',
+              'Bunny Sudoku Puzzle',
               style: TextStyle(color: Color(0xFF68D391), fontSize: 14),
             ),
             const Spacer(),
-            // Progress bar with walking rabbit
+            // Progress bar with walking bunny
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 40),
               child: AnimatedBuilder(
@@ -122,7 +122,7 @@ class _SplashScreenState extends State<SplashScreen>
                             ),
                           ),
                         ),
-                        // Walking rabbit (little hops)
+                        // Walking bunny (little hops)
                         Align(
                           alignment: Alignment(-1.0 + (t * 2.0), 0),
                           child: Transform.translate(

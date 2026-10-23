@@ -6,7 +6,7 @@ import 'rabbit_icon.dart';
 
 /// Infinitely looping, always-on animated meadow background for the stage
 /// map: drifting clouds, birds, rolling green hills, swaying grass,
-/// fluttering butterflies and a cute white rabbit hopping through the
+/// fluttering butterflies and a cute white bunny hopping through the
 /// greenery. There are no controls — it simply never stops.
 class MapBackground extends StatefulWidget {
   const MapBackground({super.key});
@@ -80,7 +80,7 @@ class _MeadowPainter extends CustomPainter {
     _paintTrees(canvas, w, midY);
     _paintHill(canvas, w, nearY, h * 0.07, _hillNear, 0.7);
     _paintGrassDetails(canvas, w, h, nearY);
-    // _paintRabbit(canvas, w, h, nearY);
+    // _paintBunny(canvas, w, h, nearY);
     _paintButterflies(canvas, w, h, nearY);
   }
 
@@ -219,8 +219,8 @@ class _MeadowPainter extends CustomPainter {
     }
   }
 
-  void _paintRabbit(Canvas canvas, double w, double h, double nearY) {
-    // Rabbit hops across the meadow, then takes a break off-screen.
+  void _paintBunny(Canvas canvas, double w, double h, double nearY) {
+    // Bunny hops across the meadow, then takes a break off-screen.
     final p = (t * 1.35) % 1.35 - 0.18; // -0.18 .. 1.17, gap after each pass
     if (p < 0 || p > 1) return;
 
@@ -250,7 +250,7 @@ class _MeadowPainter extends CustomPainter {
     canvas.translate(x, groundY + airY);
     canvas.rotate(math.sin(hopPhase * math.pi * 2) * 0.06);
     canvas.scale(scaleX, scaleY);
-    canvas.translate(-23, -46); // rabbit box is 46x46, feet on origin
+    canvas.translate(-23, -46); // bunny box is 46x46, feet on origin
     RabbitPainter(
       bodyColor: Colors.white,
       outlineColor: const Color(0xFF5D4037),
