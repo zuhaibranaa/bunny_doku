@@ -443,12 +443,12 @@ final List<_Step> _steps = [
     badge: 'RULE 2',
     title: 'One bunny per row',
     caption:
-        'No two bunnies may share a row. Watch as placing a second bunny in the same row triggers a red error.',
+        'No two bunnies may share a row. Placing a second bunny in the same row causes a red error.',
     grid: const [
       [_Cell(0, _CellContent.bunny), _Cell(0), _Cell(1), _Cell(1)],
-      [_Cell(0, _CellContent.badBunny), _Cell(2), _Cell(1), _Cell(1)],
+      [_Cell(0), _Cell(0), _Cell(1), _Cell(1)],
+      [_Cell(2, _CellContent.badBunny), _Cell(2), _Cell(1), _Cell(1)],
       [_Cell(3), _Cell(3), _Cell(1), _Cell(1)],
-      [_Cell(3), _Cell(3), _Cell(2), _Cell(2)],
     ],
   ),
   _Step(
