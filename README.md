@@ -1,4 +1,4 @@
-# 🐰 Bunny Doku
+# 🐰 Bunnoku
 
 A rabbit-themed logic puzzle game for Android and iOS — a Sudoku-variant where you place rabbits on a coloured grid, one puzzle region at a time.
 

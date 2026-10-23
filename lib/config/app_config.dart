@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 
 class AppConfig {
-  static const String appName = 'Bunny Doku';
+  static const String appName = 'Bunnoku';
   static const String packageName = 'com.rabitdoku.game';
 
   // Theme colors

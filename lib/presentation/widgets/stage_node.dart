@@ -31,7 +31,7 @@ class StageNode extends StatelessWidget {
       icon = Icons.check_circle;
       iconColor = Colors.white;
     } else if (isUnlocked) {
-      fillColor = isSpecial ? Colors.orange.shade400 : Colors.purple.shade400;
+      fillColor = isSpecial ? Colors.red.shade700 : Colors.purple.shade400;
       icon = Icons.play_circle;
       iconColor = Colors.white;
     } else {
@@ -106,6 +106,27 @@ class StageNode extends StatelessWidget {
                   ],
                 ),
               ),
+            ),
+          ],
+          // Danger / skull warning for hard special levels.
+          if (isSpecial && !isCompleted) ...[
+            const SizedBox(height: 2),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Icon(
+                  Icons.warning_amber_rounded,
+                  size: 10,
+                  color: Colors.deepOrange,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black26,
+                      offset: Offset(0, 1),
+                      blurRadius: 2,
+                    ),
+                  ],
+                ),
+              ],
             ),
           ],
         ],

@@ -42,82 +42,83 @@ class _BoosterShopScreenState extends State<BoosterShopScreen> {
 
     return Scaffold(
       backgroundColor: kCream,
-      appBar: AppBar(
-        title: const Text('Booster Shop'),
-        backgroundColor: kMauve,
-        foregroundColor: Colors.white,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Row(
-              children: [
-                const Icon(Icons.monetization_on, color: Colors.amber),
-                const SizedBox(width: 4),
-                Text('$_balance'),
-              ],
-            ),
-          )
-        ],
-      ),
-      body: Column(
-        children: [
-          if (onBuyWithCoins != null)
+      body: SafeArea(
+        child: Column(
+          children: [
             Padding(
               padding: const EdgeInsets.all(12),
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.amber,
-                  foregroundColor: Colors.black,
-                ),
-                onPressed: () => _showCoinBuyDialog(context),
-                icon: const Icon(Icons.monetization_on),
-                label: const Text('Buy 3 Boosters of Any Choice for 100 Coins'),
-              ),
-            ),
-          if (!isAdsRemoved)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.amber,
-                  foregroundColor: Colors.black,
-                ),
-                onPressed: onBuyRemoveAds,
-                icon: const Icon(Icons.info),
-                label: const Text('Remove Ads'),
-              ),
-            ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: boosters.length,
-              itemBuilder: (context, index) {
-                final b = boosters[index];
-                return ListTile(
-                  leading: _boosterIcon(b.id),
-                  title: Text(b.name,
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text(b.description),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (b.priceAd)
-                        OutlinedButton.icon(
-                          onPressed: () => onBuyBooster(b.id, true),
-                          icon: const Icon(Icons.play_circle, size: 16),
-                          label: const Text('Ad'),
-                        ),
-                      ElevatedButton.icon(
-                        onPressed: () => onBuyBooster(b.id, false),
-                        icon: const Icon(Icons.attach_money, size: 16),
-                        label: Text('\$${b.priceUsd.toStringAsFixed(2)}'),
-                      ),
-                    ],
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
                   ),
-                );
-              },
+                  const Text('Booster Shop', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                  const Spacer(),
+                  const Icon(Icons.monetization_on, color: Colors.amber),
+                  const SizedBox(width: 4),
+                  Text('$_balance', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                ],
+              ),
             ),
-          ),
-        ],
+            if (onBuyWithCoins != null)
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.amber,
+                    foregroundColor: Colors.black,
+                  ),
+                  onPressed: () => _showCoinBuyDialog(context),
+                  icon: const Icon(Icons.monetization_on),
+                  label: const Text('Buy 3 Boosters of Any Choice for 100 Coins'),
+                ),
+              ),
+            if (!isAdsRemoved)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.amber,
+                    foregroundColor: Colors.black,
+                  ),
+                  onPressed: onBuyRemoveAds,
+                  icon: const Icon(Icons.info),
+                  label: const Text('Remove Ads'),
+                ),
+              ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: boosters.length,
+                itemBuilder: (context, index) {
+                  final b = boosters[index];
+                  return ListTile(
+                    leading: _boosterIcon(b.id),
+                    title: Text(b.name,
+                        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                    subtitle: Text(b.description, style: const TextStyle(color: Colors.white70)),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (b.priceAd)
+                          OutlinedButton.icon(
+                            onPressed: () => onBuyBooster(b.id, true),
+                            icon: const Icon(Icons.play_circle, size: 16),
+                            label: const Text('Ad'),
+                          ),
+                        ElevatedButton.icon(
+                          onPressed: () => onBuyBooster(b.id, false),
+                          icon: const Icon(Icons.attach_money, size: 16),
+                          label: Text('\$${b.priceUsd.toStringAsFixed(2)}'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -1,4 +1,4 @@
-package com.example.rabit_doku
+package apk.bunnoku.click
 
 import io.flutter.embedding.android.FlutterActivity
 

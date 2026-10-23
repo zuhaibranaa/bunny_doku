@@ -75,7 +75,7 @@ class _SplashScreenState extends State<SplashScreen>
             ),
             const SizedBox(height: 12),
             const Text(
-              'Bunny Doku',
+              'Bunnoku',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 30,

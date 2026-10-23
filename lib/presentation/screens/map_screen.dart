@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/repositories/user_repository.dart';
@@ -29,6 +30,15 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+  }
 
   @override
   void didChangeDependencies() {
@@ -100,17 +110,6 @@ class _MapScreenState extends State<MapScreen> {
 
         return Scaffold(
           backgroundColor: kCream,
-          appBar: AppBar(
-            title: const Text('Bunny Doku'),
-            backgroundColor: kMauve,
-            foregroundColor: Colors.white,
-            actions: [
-              IconButton(
-                icon: const RabbitIcon(size: 22),
-                onPressed: () => Navigator.pushNamed(context, '/shop'),
-              ),
-            ],
-          ),
           body: Stack(
             children: [
               // Always-on animated meadow: a rabbit hopping through
@@ -119,7 +118,12 @@ class _MapScreenState extends State<MapScreen> {
               Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.all(12),
+                    padding: EdgeInsets.fromLTRB(
+                      12,
+                      MediaQuery.of(context).padding.top + 20,
+                      12,
+                      12,
+                    ),
                     child: Row(
                       children: [
                         // The 5-life pool lives on the map only.
@@ -129,16 +133,25 @@ class _MapScreenState extends State<MapScreen> {
                         // stage (not a live counter of the current run).
                         _StarsPill(stars: stageProvider.getTotalStars()),
                         const SizedBox(width: 12),
-                        const Icon(Icons.monetization_on, color: Colors.amber),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${userRepo.getCurrentUser()?.totalCoins ?? 0}',
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
+                        GestureDetector(
+                          onTap: () => Navigator.pushNamed(context, '/shop'),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.monetization_on, color: Colors.amber),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${userRepo.getCurrentUser()?.totalCoins ?? 0}',
+                                style: const TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
                   ),
+                  const SizedBox(height: 12),
+                ),
                 Expanded(
                   child: SingleChildScrollView(
                     child: ConstrainedBox(
