@@ -86,7 +86,7 @@ class _HowToPlayDialogState extends State<HowToPlayDialog>
     _pageController = PageController();
     _anim = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1400),
+      duration: const Duration(milliseconds: 3000),
     )..repeat();
   }
 
@@ -372,7 +372,7 @@ class _MiniGrid extends StatelessWidget {
     final index = row * cells.first.length + col;
     final base =
         cell.delay ?? (index * 0.08).clamp(0.0, 0.6);
-    final start = base + cell.taps * 0.14;
+    final start = base + cell.taps * 0.15;
     final t = ((animation.value - start) / 0.4).clamp(0.0, 1.0);
     final eased = Curves.easeOutBack.transform(t);
 
@@ -411,7 +411,7 @@ class _MiniGrid extends StatelessWidget {
     final widgets = <Widget>[];
     for (var i = 0; i < cell.taps; i++) {
       final local =
-          ((animation.value - (base + i * 0.14)) / 0.16).clamp(0.0, 1.0);
+          ((animation.value - (base + i * 0.15)) / 0.18).clamp(0.0, 1.0);
       if (local <= 0.001 || local >= 1.0) continue;
 
       final ring = Curves.easeOut.transform(local);
@@ -583,7 +583,7 @@ final List<_Step> _steps = [
         _Cell(0, _CellContent.bunny, 2, 0.04),
         _Cell(1),
         // Single tap -> X mark.
-        _Cell(2, _CellContent.xMark, 1, 0.50),
+        _Cell(2, _CellContent.xMark, 1, 0.46),
         _Cell(3),
       ],
       [_Cell(0), _Cell(1), _Cell(2), _Cell(3)],
