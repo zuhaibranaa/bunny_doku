@@ -16,10 +16,23 @@ enum _CellContent { empty, bunny, badBunny, xMark }
 
 /// One cell of a tutorial mini-grid.
 class _Cell {
-  const _Cell(this.region, [this.content = _CellContent.empty]);
+  const _Cell(
+    this.region, [
+    this.content = _CellContent.empty,
+    this.taps = 0,
+    this.delay,
+  ]);
 
   final int region;
   final _CellContent content;
+
+  /// How many tap animations to play before the content appears
+  /// (2 = double-tap for a bunny, 1 = single tap for an X).
+  final int taps;
+
+  /// Fixed point in the animation loop where this cell's sequence starts.
+  /// When null the cell uses the usual staggered reveal.
+  final double? delay;
 }
 
 /// A single "How to Play" step: a mini-grid illustration plus copy.
@@ -49,10 +62,7 @@ class HowToPlayDialog extends StatefulWidget {
   final VoidCallback? onFinished;
 
   /// Shows the tutorial as a dialog.
-  static Future<void> show(
-    BuildContext context, {
-    VoidCallback? onFinished,
-  }) {
+  static Future<void> show(BuildContext context, {VoidCallback? onFinished}) {
     return showDialog<void>(
       context: context,
       barrierColor: Colors.black54,
@@ -198,7 +208,9 @@ class _HowToPlayDialogState extends State<HowToPlayDialog>
                             const SizedBox(height: 10),
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 4),
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
                                 color: tOrange.withValues(alpha: 0.14),
                                 borderRadius: BorderRadius.circular(20),
@@ -254,7 +266,9 @@ class _HowToPlayDialogState extends State<HowToPlayDialog>
                       width: active ? 20 : 7,
                       height: 7,
                       decoration: BoxDecoration(
-                        color: active ? tOrange : tMauve.withValues(alpha: 0.25),
+                        color: active
+                            ? tOrange
+                            : tMauve.withValues(alpha: 0.25),
                         borderRadius: BorderRadius.circular(4),
                       ),
                     );
@@ -270,8 +284,10 @@ class _HowToPlayDialogState extends State<HowToPlayDialog>
                       TextButton.icon(
                         onPressed: _prev,
                         icon: const Icon(Icons.chevron_left, color: tMauve),
-                        label: const Text('Back',
-                            style: TextStyle(color: tMauve)),
+                        label: const Text(
+                          'Back',
+                          style: TextStyle(color: tMauve),
+                        ),
                       )
                     else
                       const SizedBox(width: 8),
@@ -280,10 +296,13 @@ class _HowToPlayDialogState extends State<HowToPlayDialog>
                       style: ElevatedButton.styleFrom(
                         backgroundColor: tOrange,
                         foregroundColor: Colors.white,
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 12,
+                        ),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14)),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                       ),
                       onPressed: _next,
                       icon: Icon(
@@ -343,14 +362,17 @@ class _MiniGrid extends StatelessWidget {
     );
   }
 
-  Widget _buildCell(
-      BuildContext context, int row, int col, double cellSize) {
+  Widget _buildCell(BuildContext context, int row, int col, double cellSize) {
     final cell = cells[row][col];
     final color = _palette[cell.region % _palette.length];
 
-    // Stagger the reveal so the board fills in like a live puzzle.
+    // Stagger the reveal so the board fills in like a live puzzle. Cells that
+    // demonstrate taps first wait for their tap sequence to finish before the
+    // content (bunny / X) pops in.
     final index = row * cells.first.length + col;
-    final start = (index * 0.08).clamp(0.0, 0.6);
+    final base =
+        cell.delay ?? (index * 0.08).clamp(0.0, 0.6);
+    final start = base + cell.taps * 0.14;
     final t = ((animation.value - start) / 0.4).clamp(0.0, 1.0);
     final eased = Curves.easeOutBack.transform(t);
 
@@ -370,12 +392,67 @@ class _MiniGrid extends StatelessWidget {
               width: 1.5,
             ),
           ),
-          child: Center(
-            child: _content(cell, cellSize, eased, t),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              if (cell.taps > 0) ..._tapRipples(cell, cellSize, base),
+              Center(child: _content(cell, cellSize, eased, t)),
+            ],
           ),
         ),
       ),
     );
+  }
+
+  /// Tap feedback drawn before the cell content appears: a finger icon that
+  /// presses down plus an expanding ripple ring. [base] is where the sequence
+  /// starts inside the animation loop.
+  List<Widget> _tapRipples(_Cell cell, double size, double base) {
+    final widgets = <Widget>[];
+    for (var i = 0; i < cell.taps; i++) {
+      final local =
+          ((animation.value - (base + i * 0.14)) / 0.16).clamp(0.0, 1.0);
+      if (local <= 0.001 || local >= 1.0) continue;
+
+      final ring = Curves.easeOut.transform(local);
+      // Finger is fully visible right at the press, then lifts away.
+      final fingerOpacity = local < 0.25
+          ? (local / 0.12).clamp(0.0, 1.0)
+          : ((1 - local) / 0.6).clamp(0.0, 1.0);
+
+      widgets.add(
+        IgnorePointer(
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Opacity(
+                opacity: (1 - ring) * 0.85,
+                child: Container(
+                  width: size * (0.30 + 0.62 * ring),
+                  height: size * (0.30 + 0.62 * ring),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2.5),
+                  ),
+                ),
+              ),
+              Opacity(
+                opacity: fingerOpacity,
+                child: Icon(
+                  Icons.touch_app,
+                  size: size * 0.52,
+                  color: Colors.white,
+                  shadows: const [
+                    Shadow(color: Colors.black26, blurRadius: 4),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    return widgets;
   }
 
   Widget _content(_Cell cell, double size, double eased, double t) {
@@ -414,7 +491,11 @@ class _MiniGrid extends StatelessWidget {
           scale: 0.4 + 0.6 * eased,
           child: Opacity(
             opacity: t,
-            child: const BoldX(size: 40, color: Colors.white, strokeWidthRatio: 0.2),
+            child: const BoldX(
+              size: 40,
+              color: Colors.white,
+              strokeWidthRatio: 0.2,
+            ),
           ),
         );
       case _CellContent.empty:
@@ -430,11 +511,10 @@ final List<_Step> _steps = [
   _Step(
     badge: 'RULE 1',
     title: 'One bunny per colour region',
-    caption:
-        'Every coloured region holds exactly one bunny. Place a second bunny in the same region and it\'ll be marked wrong.',
+    caption: 'Every coloured region holds exactly one bunny. Place a second bunny in the same region and it\'ll be marked wrong.',
     grid: const [
       [_Cell(0, _CellContent.bunny), _Cell(0), _Cell(1), _Cell(1)],
-      [_Cell(0, _CellContent.badBunny), _Cell(0), _Cell(1), _Cell(1)],
+      [_Cell(0), _Cell(0), _Cell(0, _CellContent.badBunny), _Cell(1)],
       [_Cell(2), _Cell(2), _Cell(3), _Cell(3)],
       [_Cell(2), _Cell(2), _Cell(3), _Cell(3)],
     ],
@@ -442,36 +522,53 @@ final List<_Step> _steps = [
   _Step(
     badge: 'RULE 2',
     title: 'One bunny per row',
-    caption:
-        'No two bunnies may share a row. Placing a second bunny in the same row causes a red error.',
+    caption: 'No two bunnies may share a row. Placing a second bunny in the same row causes a red error.',
     grid: const [
-      [_Cell(0, _CellContent.bunny), _Cell(0), _Cell(1), _Cell(1)],
+      [
+        _Cell(0, _CellContent.bunny),
+        _Cell(0),
+        _Cell(1, _CellContent.badBunny),
+        _Cell(1),
+      ],
       [_Cell(0), _Cell(0), _Cell(1), _Cell(1)],
-      [_Cell(2, _CellContent.badBunny), _Cell(2), _Cell(1), _Cell(1)],
+      [_Cell(2), _Cell(2), _Cell(1), _Cell(1)],
       [_Cell(3), _Cell(3), _Cell(1), _Cell(1)],
     ],
   ),
   _Step(
     badge: 'RULE 3',
     title: 'One bunny per column',
-    caption:
-        'No two bunnies may share a column. Placing a second bunny in the same column causes an error.',
+    caption: 'No two bunnies may share a column. Placing a second bunny in the same column causes an error.',
     grid: const [
-      [_Cell(0, _CellContent.bunny), _Cell(1), _Cell(2), _Cell(2)],
-      [_Cell(3), _Cell(1), _Cell(2), _Cell(2)],
-      [_Cell(0, _CellContent.badBunny), _Cell(4), _Cell(2), _Cell(2)],
-      [_Cell(5), _Cell(5), _Cell(5), _Cell(5)],
+      [_Cell(0, _CellContent.bunny), _Cell(0), _Cell(1), _Cell(1)],
+      [_Cell(0), _Cell(0), _Cell(1), _Cell(1)],
+      [_Cell(2, _CellContent.badBunny), _Cell(2), _Cell(3), _Cell(3)],
+      [_Cell(2), _Cell(2), _Cell(3), _Cell(3)],
     ],
   ),
   _Step(
     badge: 'RULE 4',
     title: 'No touching bunnies',
-    caption:
-        'Bunnies may not sit side by side or diagonally. Even a corner touch is illegal and shows as an error.',
+    caption: 'Bunnies may not sit side by side or diagonally. Even a corner touch is illegal and shows as an error.',
     grid: const [
-      [_Cell(0), _Cell(1), _Cell(2), _Cell(3)],
-      [_Cell(0), _Cell(1, _CellContent.bunny), _Cell(2), _Cell(3)],
-      [_Cell(4), _Cell(4), _Cell(5, _CellContent.badBunny), _Cell(5)],
+      [
+        _Cell(0, _CellContent.badBunny),
+        _Cell(1, _CellContent.badBunny),
+        _Cell(2, _CellContent.badBunny),
+        _Cell(3),
+      ],
+      [
+        _Cell(0, _CellContent.badBunny),
+        _Cell(1, _CellContent.bunny),
+        _Cell(2, _CellContent.badBunny),
+        _Cell(3),
+      ],
+      [
+        _Cell(4, _CellContent.badBunny),
+        _Cell(4, _CellContent.badBunny),
+        _Cell(5, _CellContent.badBunny),
+        _Cell(5),
+      ],
       [_Cell(4), _Cell(4), _Cell(5), _Cell(5)],
     ],
   ),
@@ -479,9 +576,16 @@ final List<_Step> _steps = [
     badge: 'CONTROLS',
     title: 'How to place and mark',
     caption:
-        'Double-tap a cell to place a bunny. Tap or swipe across cells to mark them with an X, and tap the X again to clear it. A placed or starter) bunny is locked in place.',
+        'Double-tap a cell to place a bunny. Tap or swipe across cells to mark them with an X, and tap the X again to clear it. A placed bunny is locked in place.',
     grid: const [
-      [_Cell(0, _CellContent.bunny), _Cell(1), _Cell(2, _CellContent.xMark), _Cell(3)],
+      [
+        // Double-tap -> bunny.
+        _Cell(0, _CellContent.bunny, 2, 0.04),
+        _Cell(1),
+        // Single tap -> X mark.
+        _Cell(2, _CellContent.xMark, 1, 0.50),
+        _Cell(3),
+      ],
       [_Cell(0), _Cell(1), _Cell(2), _Cell(3)],
       [_Cell(4), _Cell(4, _CellContent.bunny), _Cell(5), _Cell(5)],
       [_Cell(4), _Cell(4), _Cell(5), _Cell(5)],

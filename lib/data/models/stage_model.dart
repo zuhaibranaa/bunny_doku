@@ -36,11 +36,20 @@ class StageModel {
       difficulty: json['difficulty'].toString(),
       isSpecial: json['isSpecial'] as bool? ?? false,
       regionGrid: grid,
-      starterBunnyRow: (json['starterBunnyRow'] as int?) ?? -1,
-      starterBunnyCol: (json['starterBunnyCol'] as int?) ?? -1,
+      starterBunnyRow: _starter(json, 'starterBunnyRow', 'starterRabbitRow'),
+      starterBunnyCol: _starter(json, 'starterBunnyCol', 'starterRabbitCol'),
       solution: solution,
     );
   }
+
+  /// Reads a starter coordinate, accepting both the new `starterBunny*` keys
+  /// and the legacy `starterRabbit*` keys used by bundled/remote packs.
+  static int _starter(
+    Map<String, dynamic> json,
+    String key,
+    String legacyKey,
+  ) =>
+      (json[key] as int?) ?? (json[legacyKey] as int?) ?? -1;
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -50,6 +59,9 @@ class StageModel {
         'regionGrid': regionGrid,
         'starterBunnyRow': starterBunnyRow,
         'starterBunnyCol': starterBunnyCol,
+        // Legacy keys keep older clients / remote packs in sync.
+        'starterRabbitRow': starterBunnyRow,
+        'starterRabbitCol': starterBunnyCol,
         'solution': solution,
       };
 

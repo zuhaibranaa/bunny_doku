@@ -18,7 +18,7 @@ void main() {
       await settle(tester);
 
       expect(find.text('How to Play'), findsOneWidget);
-      expect(find.text('One rabbit per colour region'), findsOneWidget);
+      expect(find.text('One bunny per colour region'), findsOneWidget);
       expect(find.text('Next'), findsOneWidget);
     });
 
@@ -29,10 +29,10 @@ void main() {
       await settle(tester);
 
       const titles = [
-        'One rabbit per colour region',
-        'One rabbit per row',
-        'One rabbit per column',
-        'No touching rabbits',
+        'One bunny per colour region',
+        'One bunny per row',
+        'One bunny per column',
+        'No touching bunnies',
         'How to place and mark',
       ];
 
@@ -55,11 +55,11 @@ void main() {
 
       await tester.tap(find.text('Next'));
       await settle(tester);
-      expect(find.text('One rabbit per row'), findsOneWidget);
+      expect(find.text('One bunny per row'), findsOneWidget);
 
       await tester.tap(find.text('Back'));
       await settle(tester);
-      expect(find.text('One rabbit per colour region'), findsOneWidget);
+      expect(find.text('One bunny per colour region'), findsOneWidget);
     });
 
     testWidgets('renders one page dot per step', (tester) async {
