@@ -764,100 +764,103 @@ class _GameScreenState extends State<GameScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        backgroundColor: kCream,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          'Stage Complete!',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: kMauve, fontWeight: FontWeight.bold),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(3, (i) {
-                final filled = i < stars;
-                return TweenAnimationBuilder<double>(
-                  key: ValueKey('win-star-$i-$stars'),
-                  tween: Tween(begin: 0, end: 1),
-                  duration: Duration(milliseconds: 400 + i * 200),
-                  curve: Curves.elasticOut,
-                  builder: (_, v, __) => Transform.scale(
-                    scale: v,
-                    child: Icon(
-                      filled ? Icons.star : Icons.star_border,
-                      size: 40,
-                      color: filled ? kGold : Colors.grey.shade300,
-                    ),
-                  ),
-                );
-              }),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Score: $_score',
-              style: const TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.bold, color: kMauve),
-            ),
-            if (coins > 0) ...[
-              const SizedBox(height: 8),
+      builder: (_) => WillPopScope(
+        onWillPop: () async => false,
+        child: AlertDialog(
+          backgroundColor: kCream,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Text(
+            'Stage Complete!',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: kMauve, fontWeight: FontWeight.bold),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.monetization_on,
-                      color: Colors.amber, size: 24),
-                  const SizedBox(width: 6),
-                  Text(
-                    '+$coins coins',
-                    style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: kMauve),
-                  ),
-                ],
+                children: List.generate(3, (i) {
+                  final filled = i < stars;
+                  return TweenAnimationBuilder<double>(
+                    key: ValueKey('win-star-$i-$stars'),
+                    tween: Tween(begin: 0, end: 1),
+                    duration: Duration(milliseconds: 400 + i * 200),
+                    curve: Curves.elasticOut,
+                    builder: (_, v, __) => Transform.scale(
+                      scale: v,
+                      child: Icon(
+                        filled ? Icons.star : Icons.star_border,
+                        size: 40,
+                        color: filled ? kGold : Colors.grey.shade300,
+                      ),
+                    ),
+                  );
+                }),
               ),
+              const SizedBox(height: 12),
+              Text(
+                'Score: $_score',
+                style: const TextStyle(
+                    fontSize: 18, fontWeight: FontWeight.bold, color: kMauve),
+              ),
+              if (coins > 0) ...[
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.monetization_on,
+                        color: Colors.amber, size: 24),
+                    const SizedBox(width: 6),
+                    Text(
+                      '+$coins coins',
+                      style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: kMauve),
+                    ),
+                  ],
+                ),
+              ],
             ],
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              final nav = Navigator.of(context);
-              nav.pop(); // close dialog
-              await _adProvider.showInterstitial(stageId);
-              if (mounted) nav.pop(); // back to map
-            },
-            child: const Text('Map'),
           ),
-          if (nextId != null)
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: kOrange,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-              ),
+          actions: [
+            TextButton(
               onPressed: () async {
                 final nav = Navigator.of(context);
                 nav.pop(); // close dialog
                 await _adProvider.showInterstitial(stageId);
-                nav.pop(); // back to map
-                final stages = _stageProvider.stages;
-                final next =
-                    stages.firstWhere((s) => s.id == nextId);
-                nav.pushNamed(GameScreen.routeName, arguments: {
-                  'id': next.id,
-                  'regionGrid': next.regionGrid,
-                  'starterRabbitRow': next.starterRabbitRow,
-                  'starterRabbitCol': next.starterRabbitCol,
-                  'isSpecial': next.isSpecialStage,
-                });
+                if (mounted) nav.pop(); // back to map
               },
-              child: const Text('Next Stage'),
+              child: const Text('Map'),
             ),
-        ],
+            if (nextId != null)
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: kOrange,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () async {
+                  final nav = Navigator.of(context);
+                  nav.pop(); // close dialog
+                  await _adProvider.showInterstitial(stageId);
+                  nav.pop(); // back to map
+                  final stages = _stageProvider.stages;
+                  final next =
+                      stages.firstWhere((s) => s.id == nextId);
+                  nav.pushNamed(GameScreen.routeName, arguments: {
+                    'id': next.id,
+                    'regionGrid': next.regionGrid,
+                    'starterRabbitRow': next.starterRabbitRow,
+                    'starterRabbitCol': next.starterRabbitCol,
+                    'isSpecial': next.isSpecialStage,
+                  });
+                },
+                child: const Text('Next Stage'),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -866,47 +869,50 @@ class _GameScreenState extends State<GameScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        backgroundColor: kCream,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          'Out of Hearts!',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: kMauve, fontWeight: FontWeight.bold),
-        ),
-        content: const Text(
-          'Wrong placements cost hearts. Want to keep going?',
-          textAlign: TextAlign.center,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context);
-            },
-            child: const Text('Give Up'),
+      builder: (_) => WillPopScope(
+        onWillPop: () async => false,
+        child: AlertDialog(
+          backgroundColor: kCream,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Text(
+            'Out of Hearts!',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: kMauve, fontWeight: FontWeight.bold),
           ),
-          if (_isMobile)
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-              ),
-              onPressed: () async {
-                final stageHearts =
-                    (_gameProvider.gameState?['livesStart'] as int?) ?? 3;
-                final ok = await _adProvider.showRewardedAd((_, __) {
-                  _gameProvider.revive(stageHearts);
-                });
-                if (!ok) _snack('Ad not ready — try again in a moment.');
-                if (mounted) Navigator.pop(context);
-                if (mounted) setState(() {});
+          content: const Text(
+            'Wrong placements cost hearts. Want to keep going?',
+            textAlign: TextAlign.center,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pop(context);
               },
-              child: const Text('Watch Ad to Revive'),
+              child: const Text('Give Up'),
             ),
-        ],
+            if (_isMobile)
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () async {
+                  final stageHearts =
+                      (_gameProvider.gameState?['livesStart'] as int?) ?? 3;
+                  final ok = await _adProvider.showRewardedAd((_, __) {
+                    _gameProvider.revive(stageHearts);
+                  });
+                  if (!ok) _snack('Ad not ready — try again in a moment.');
+                  if (mounted) Navigator.pop(context);
+                  if (mounted) setState(() {});
+                },
+                child: const Text('Watch Ad to Revive'),
+              ),
+          ],
+        ),
       ),
     );
   }
