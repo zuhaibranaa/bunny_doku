@@ -11,7 +11,7 @@ class PurchaseBoosterUseCase {
               name: c['name'] as String,
               description: c['description'] as String,
               icon: c['icon'] as String,
-              priceUsd: c['priceUsd'] as double,
+              coinPrice: c['coinPrice'] as int,
               priceAd: c['priceAd'] as bool,
               adRewardAmount: c['adRewardAmount'] as int,
             ))
@@ -26,7 +26,7 @@ class PurchaseBoosterUseCase {
       name: config['name'] as String,
       description: config['description'] as String,
       icon: config['icon'] as String,
-      priceUsd: config['priceUsd'] as double,
+      coinPrice: config['coinPrice'] as int,
       priceAd: config['priceAd'] as bool,
       adRewardAmount: config['adRewardAmount'] as int,
     );

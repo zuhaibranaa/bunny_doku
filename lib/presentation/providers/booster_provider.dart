@@ -38,7 +38,7 @@ class BoosterProvider extends ChangeNotifier {
               name: b['name'] as String,
               description: b['description'] as String,
               icon: b['icon'] as String,
-              priceUsd: (b['priceUsd'] as num).toDouble(),
+              coinPrice: (b['coinPrice'] as num).toInt(),
               priceAd: b['priceAd'] as bool,
               adRewardAmount: b['adRewardAmount'] as int,
             ))
@@ -77,17 +77,19 @@ class BoosterProvider extends ChangeNotifier {
     await add(boosterId, 1);
   }
 
-  Future<void> buyBoosterWithAd(String boosterId) async {
-    if (_adProvider == null) {
-      await add(boosterId, 1);
-      return;
-    }
-    final shown = await _adProvider!.showRewardedAd((_, reward) async {
+  /// Shows a rewarded ad and grants one [boosterId] once the reward is earned.
+  /// Returns true when the ad was actually shown, false when none was ready
+  /// (a fresh ad is requested for the next tap).
+  Future<bool> buyBoosterWithAd(String boosterId) async {
+    final adProvider = _adProvider;
+    if (adProvider == null) return false;
+
+    final shown = await adProvider.showRewardedAd((_, __) async {
       await add(boosterId, 1);
     });
     if (!shown) {
-      // Fallback to giving booster if ad fails
-      await add(boosterId, 1);
+      adProvider.loadRewardedAd();
     }
+    return shown;
   }
 }

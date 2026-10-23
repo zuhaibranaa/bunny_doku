@@ -5,15 +5,12 @@ import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
 import '../../config/booster_config.dart';
-import '../../data/repositories/booster_repository.dart';
+import '../../config/coin_config.dart';
 import '../../data/repositories/user_repository.dart';
-
-const String removeAdsProductId = 'remove_ads';
 
 bool get _isMobile => Platform.isAndroid || Platform.isIOS;
 
 class IAPProvider extends ChangeNotifier {
-  final BoosterRepository _boosterRepo;
   final UserRepository _userRepo;
 
   final InAppPurchase _iap = InAppPurchase.instance;
@@ -24,11 +21,7 @@ class IAPProvider extends ChangeNotifier {
   String? _error;
   StreamSubscription<List<PurchaseDetails>>? _subscription;
 
-  IAPProvider({
-    required BoosterRepository boosterRepo,
-    required UserRepository userRepo,
-  })  : _boosterRepo = boosterRepo,
-        _userRepo = userRepo;
+  IAPProvider({required UserRepository userRepo}) : _userRepo = userRepo;
 
   List<ProductDetails> get products => _products;
   bool get isAvailable => _isAvailable;
@@ -50,8 +43,9 @@ class IAPProvider extends ChangeNotifier {
     }
 
     final ids = <String>{
-      for (final b in BoosterConfig.allBoosters) b['id'] as String,
+      for (final p in CoinConfig.packages) p.id,
       removeAdsProductId,
+      'coins_pack', // legacy alias, harmless if missing
     };
 
     final response = await _iap.queryProductDetails(ids);
@@ -80,8 +74,66 @@ class IAPProvider extends ChangeNotifier {
     if (purchase.productID == removeAdsProductId) {
       await _userRepo.removeAds();
     } else {
-      await _boosterRepo.addBooster(purchase.productID, 1);
+      final pack = CoinConfig.packageForProduct(purchase.productID);
+      if (pack != null) {
+        await _userRepo.addCoins(pack.coins);
+      }
     }
+    // Consumables must be acknowledged so they can be purchased again.
+    if (purchase.pendingCompletePurchase) {
+      await _iap.completePurchase(purchase);
+    }
+    notifyListeners();
+  }
+
+  /// Localised store price for a product, falling back to [fallback].
+  String priceFor(String productId, String fallback) {
+    for (final p in _products) {
+      if (p.id == productId) return p.price;
+    }
+    return fallback;
+  }
+
+  /// Buys a coin package. Returns true when the purchase flow started.
+  Future<bool> buyCoinPackage(CoinPackage pack) async {
+    if (!_isMobile || !_isAvailable) {
+      return _devGrantCoins(pack);
+    }
+
+    ProductDetails? product;
+    for (final p in _products) {
+      if (p.id == pack.id) product = p;
+    }
+    if (product == null) {
+      // Product is not configured in the store yet — in debug builds allow
+      // testing the flow without a real transaction.
+      return _devGrantCoins(pack);
+    }
+
+    try {
+      final started = await _iap.buyConsumable(
+        purchaseParam: PurchaseParam(productDetails: product),
+        autoConsume: true,
+      );
+      return started;
+    } catch (e) {
+      _error = 'Purchase failed: $e';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Debug-only fallback so the coin flow is testable before the store
+  /// products exist. Never grants coins in release builds.
+  Future<bool> _devGrantCoins(CoinPackage pack) async {
+    if (!kDebugMode) {
+      _error = 'Purchases are not configured yet.';
+      notifyListeners();
+      return false;
+    }
+    await _userRepo.addCoins(pack.coins);
+    notifyListeners();
+    return true;
   }
 
   Future<void> buyProduct(String productId) async {
@@ -95,11 +147,9 @@ class IAPProvider extends ChangeNotifier {
       (p) => p.id == productId,
       orElse: () => throw Exception('Product $productId not found'),
     );
-    await _iap.buyNonConsumable(purchaseParam: PurchaseParam(productDetails: product));
-  }
-
-  Future<void> buyBooster(String boosterId) async {
-    await buyProduct(boosterId);
+    await _iap.buyNonConsumable(
+      purchaseParam: PurchaseParam(productDetails: product),
+    );
   }
 
   Future<void> buyRemoveAds() async {

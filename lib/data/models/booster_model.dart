@@ -4,7 +4,7 @@ class BoosterModel {
   final String name;
   final String description;
   final String icon;
-  final double priceUsd;
+  final int coinPrice;
   final bool priceAd; // can be bought by watching an ad
   final int adRewardAmount;
 
@@ -13,7 +13,7 @@ class BoosterModel {
     required this.name,
     required this.description,
     required this.icon,
-    required this.priceUsd,
+    required this.coinPrice,
     required this.priceAd,
     required this.adRewardAmount,
   });
@@ -24,7 +24,7 @@ class BoosterModel {
       name: config['name'] as String,
       description: config['description'] as String,
       icon: config['icon'] as String,
-      priceUsd: (config['priceUsd'] as num).toDouble(),
+      coinPrice: (config['coinPrice'] as num).toInt(),
       priceAd: config['priceAd'] as bool? ?? false,
       adRewardAmount: config['adRewardAmount'] as int? ?? 0,
     );
@@ -35,7 +35,7 @@ class BoosterModel {
         'name': name,
         'description': description,
         'icon': icon,
-        'priceUsd': priceUsd,
+        'coinPrice': coinPrice,
         'priceAd': priceAd,
         'adRewardAmount': adRewardAmount,
       };

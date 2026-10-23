@@ -37,8 +37,15 @@ can only hold 2 rabbits).
 
 ### D4 — Booster tutorial in the first five stages
 Players receive 3 of every booster for free and see a short booster
-introduction when they enter one of stages 1–5. After that boosters are bought
-with IAP, a rewarded ad, or 100 coins for 3 boosters of the player's choice.
+introduction when they enter one of stages 1–5. After that each booster is
+bought individually with coins (Hint 50, Extra Life 80, Reveal Cell 120) or a
+rewarded ad. The old "3 boosters for 100 coins" bundle dialog was removed.
+
+### D5a — Coins are bought, boosters are not
+Real money only buys coin packages (100 / 550 / 1200 coins, `coin_config.dart`).
+Boosters are never sold for money directly, so pricing stays in one currency.
+In debug builds a coin package tap grants the coins locally when the store
+product is missing, so the flow can be tested before Play Console setup.
 
 ### D5 — Passed stages are permanent
 `bestStageIndex` / `unlockedStageIndex` only move forward. A stage that has

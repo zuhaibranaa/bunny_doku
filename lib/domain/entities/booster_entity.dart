@@ -4,7 +4,7 @@ class BoosterEntity {
   final String name;
   final String description;
   final String icon;
-  final double priceUsd;
+  final int coinPrice;
   final bool priceAd;
   final int adRewardAmount;
 
@@ -13,7 +13,7 @@ class BoosterEntity {
     required this.name,
     required this.description,
     required this.icon,
-    required this.priceUsd,
+    required this.coinPrice,
     required this.priceAd,
     required this.adRewardAmount,
   });

@@ -5,9 +5,9 @@ class BoosterButton extends StatelessWidget {
   final String boosterId;
   final String name;
   final int quantity;
-  final double priceUsd;
+  final int coinPrice;
   final bool canBuyWithAd;
-  final VoidCallback onBuyWithMoney;
+  final VoidCallback onBuyWithCoins;
   final VoidCallback onBuyWithAd;
   final VoidCallback? onUse;
 
@@ -16,9 +16,9 @@ class BoosterButton extends StatelessWidget {
     required this.boosterId,
     required this.name,
     required this.quantity,
-    required this.priceUsd,
+    required this.coinPrice,
     required this.canBuyWithAd,
-    required this.onBuyWithMoney,
+    required this.onBuyWithCoins,
     required this.onBuyWithAd,
     this.onUse,
   });
@@ -52,9 +52,9 @@ class BoosterButton extends StatelessWidget {
                       label: const Text('Ad'),
                     ),
                   ElevatedButton.icon(
-                    onPressed: onBuyWithMoney,
-                    icon: const Icon(Icons.attach_money, size: 16),
-                    label: Text('\$${priceUsd.toStringAsFixed(2)}'),
+                    onPressed: onBuyWithCoins,
+                    icon: const Icon(Icons.monetization_on, size: 16),
+                    label: Text('$coinPrice'),
                   ),
                 ],
               ),

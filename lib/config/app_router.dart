@@ -23,36 +23,19 @@ class AppRouter {
         );
       case '/shop':
         return MaterialPageRoute(
-          builder: (context) {
-            final boosterProvider = context.read<BoosterProvider>();
-            final userRepo = context.read<UserRepository>();
-            // The real coin balance, not the star total.
-            final balance = userRepo.getCurrentUser()?.totalCoins ?? 0;
+          builder: (context) => Consumer<BoosterProvider>(
+            builder: (context, boosterProvider, _) {
+              final userRepo = context.read<UserRepository>();
 
-            return BoosterShopScreen(
-              boosters: boosterProvider.boosters,
-              onBuyBooster: (id, withAd) async {
-                if (withAd) {
-                  await boosterProvider.buyBoosterWithAd(id);
-                } else {
-                  await boosterProvider.buyBooster(id);
-                }
-              },
-              onBuyRemoveAds: () {
-                Navigator.pushNamed(context, '/purchase');
-              },
-              isAdsRemoved: userRepo.getCurrentUser()?.isAdsRemoved ?? false,
-              coinBalance: balance,
-              onBuyWithCoins: (id) async {
-                // 3 boosters of any type for 100 coins — the coins are
-                // actually deducted so the balance stays truthful.
-                final paid = await userRepo.spendCoins(100);
-                if (!paid) return false;
-                await boosterProvider.addQuantity(id, 3);
-                return true;
-              },
-            );
-          },
+              return BoosterShopScreen(
+                boosters: boosterProvider.boosters,
+                onBuyRemoveAds: () {
+                  Navigator.pushNamed(context, '/purchase');
+                },
+                isAdsRemoved: userRepo.getCurrentUser()?.isAdsRemoved ?? false,
+              );
+            },
+          ),
         );
       case '/purchase':
         return MaterialPageRoute(

@@ -5,11 +5,11 @@ Rabit_doku is a Flutter mobile puzzle game inspired by Meowdoku (rabbit theme).
 - Grid: starts at 4×4 (stages 1-8) and grows with difficulty up to 10×10 across 100 bundled stages — region count always equals grid size (1 region color per N rabbits). Board size is random inside each difficulty band, so the authoritative size is the stage's own `regionGrid`
 - Rules: 1 rabbit/row | 1 rabbit/column | no diagonal adjacency | 1 rabbit/region
 - Starter locked rabbit is **optional** (some stages ship one, some start empty)
-- Lives: 5 extra lives (max 5, refill 1 every 5 minutes with countdown) — **map-level entry pool only**: starting a stage consumes 1; at 0 lives no stage can be started
+- Lives: 5 extra lives (max 5, refill 1 every 30 minutes with countdown); 1 life can also be bought for 200 coins → **map-level entry pool only**: starting a stage consumes 1; at 0 lives no stage can be started
 - In-stage hearts: 3 (1 on special stages); wrong placement −1 heart and a persistent red X on the cell; at 0 hearts → game over (rewarded-ad revive restores stage-start hearts). The 5-life pool is never consumed mid-stage
 - Stage selection: Candy Crush Saga-style scrollable map
 - Daily stages via remote config (no app update for content)
-- Boosters: buy with real money (IAP) OR watch rewarded ad
+- Boosters: buy with **coins** (50 / 80 / 120) OR watch a rewarded ad; coins are bought with real money via IAP coin packages
 - Ads: AdMob rewarded/interstitial/banner with tenure-based cadence
 
 ## Tech Stack
@@ -26,7 +26,8 @@ Rabit_doku is a Flutter mobile puzzle game inspired by Meowdoku (rabbit theme).
 ```
 lib/
   main.dart
-  config/             app_config.dart, release_config.dart, booster_config.dart, ad_config.dart
+  config/             app_config.dart, release_config.dart, booster_config.dart, ad_config.dart,
+                      coin_config.dart, difficulty_config.dart, life_config.dart
   core/
     constants/        app_constants.dart, grid_constants.dart
     errors/           app_exception.dart
@@ -62,7 +63,7 @@ assets/
 6. Special stage every 10th stage (10, 20, 30…) forces 1 life instead of 3.
 7. Daily stages load from remote config/cache; NEVER require app update for new content.
 8. Ad cadence by tenure: Days 0-2 = 120s, Days 2-7 = 100s, Day 7+ = 90s interstitial cooldown.
-9. Boosters can be bought via IAP (real money) OR rewarded ad.
+9. Boosters are bought with **coins** OR a rewarded ad — never with real money directly. Coins come from gameplay, daily rewards, or IAP coin packages (100 / 550 / 1200).
 
 ## How to Add Daily Stages (No App Update)
 1. Publish new stage JSON to remote endpoint / Firebase Remote Config.
@@ -71,9 +72,13 @@ assets/
 4. Bump `contentVersion` in `release_config.dart` only; do NOT bump `pubspec.yaml` version. (Also bump `assets/stages/version.json` to match when the bundled pack changes — installed clients reload bundled stages only when the stored version is older.)
 
 ## Booster System
-Types: HINT, EXTRA_LIFE, UNDO, REVEAL_CELL
-- Purchase path 1: IAP via `in_app_purchase` (Google Play Billing / Apple App Store)
+Types: HINT, EXTRA_LIFE, REVEAL_CELL (Undo was removed)
+- Purchase path 1: **coins** (`SpendCoins` → `BoosterProvider.addQuantity`)
 - Purchase path 2: Rewarded Ad via `google_mobile_ads`
+- Coins are bought with real money through IAP coin packages
+  (`lib/config/coin_config.dart`, consumables `coins_100`, `coins_550`, `coins_1200`)
+- The shop lists coin packages and every booster individually — there is no
+  "buy 3 boosters" bundle dialog
 - Inventory stored in Hive + synced to shared_preferences
 - Receipt validation optional (local or server)
 
